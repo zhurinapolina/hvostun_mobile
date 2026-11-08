@@ -1,0 +1,58 @@
+window.__flow=async function(){
+  const wait=ms=>new Promise(r=>setTimeout(r,ms)),P=window.__p,log=[];
+  const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+  const app=$('#app');
+  const txt=t=>$$('#app a,#app button').find(e=>e.textContent.trim().startsWith(t)&&e.offsetParent);
+  const click=async(t,ms=60)=>{const e=typeof t==='string'?txt(t):t;if(!e){log.push('!! нет кнопки '+t);return}e.click();await wait(ms)};
+  const setv=(e,v)=>{e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}))};
+  const nav=()=>$$('#app .nv a').map(a=>a.textContent.trim()[0]+(a.classList.contains('on')?'*':a.classList.contains('off')?'-':'')).join(' ');
+  const s=m=>log.push(m+' → '+P.cur()+' ['+nav()+']');
+  try{
+  P.preset(0);await wait(30);s('старт');
+  await click('Войти');s('S1 войти');
+  const ch=$('#app input[type=checkbox]');
+  const login=$$('#app input').filter(i=>i.type!=='checkbox');
+  const dis=txt('Войти');log.push('Войти без согласия disabled='+(dis.disabled||dis.classList.contains('dis')||dis.getAttribute('aria-disabled')));
+  await click(login[0].parentElement.querySelector('button')||dis);
+  setv(login[0],'ошибка');setv(login[1],'123');ch.click();await wait(30);
+  await click('Войти',1000);s('логин ошибка');log.push('ошибка видна: '+$('#app .eslot').textContent.trim());
+  const l2=$$('#app input').filter(i=>i.type!=='checkbox');setv(l2[0],'polina');setv(l2[1],'123');
+  const c2=$('#app input[type=checkbox]');if(!c2.checked)c2.click();await wait(30);
+  await click('Войти',1000);s('логин ок');
+  await click($('#app .nx'));s('следующий шаг');
+  const name=$('#app form input[type=text],#app form input:not([type])');setv(name,'Васёк');
+  await click($('#app .hd .ic,#app .hd button,#app .hd a'));s('назад из S4');
+  log.push('A2 next: '+$('#app .nx').textContent.trim().slice(0,40));
+  await click($('#app .nx'));s('продолжить');
+  log.push('кличка сохранена: '+$('#app form input').value);
+  await click('Готово',50);log.push('ошибок после Готово: '+$$('#app .miss').length+'; кличка без ошибки: '+!$('#app form .fl.miss input'));
+  const pick=async v=>{const l=$$('#app form label').find(e=>e.textContent.trim()===v);if(!l)log.push('!! нет '+v);else{l.click();await wait(15)}};
+  await pick('старше 7 лет');await pick('мальчик');
+  const d=$$('#app form input').filter(i=>!['radio','checkbox'].includes(i.type))[1];
+  log.push('дата поле: '+(d&&d.outerHTML.slice(0,90)));
+  d.click();await wait(30);$('#app .dp-n').click();await wait(30);$$('#app .dp-d:not([disabled])')[6].click();await wait(30);log.push('календарь: '+d.value+' закрыт='+!$('#app .dp'));
+  await pick('из приюта');await pick('нет, раньше были собаки');
+  await click('Готово',1200);s('готово');
+  await click($('#app .nx'));s('B next (S5)');
+  await click($('#app .hd .ic,#app .hd button,#app .hd a'));s('назад из S5');
+  log.push('B next: '+$('#app .nx').textContent.trim().slice(0,40));
+  await click($('#app .nx'));s('снова S5');
+  await click('Заполнить анкету');s('анкета');
+  await click($('#app .hd .ic,#app .hd button,#app .hd a'));s('закрыть S6');
+  log.push('C next: '+$('#app .nx').textContent.trim().slice(0,40));
+  await click($('#app .nx'));s('продолжить анкету');
+  log.push('Далее disabled: '+(txt('Далее').disabled));
+  await click($$('#app .s11 label,#app .s11 button')[7]);
+  log.push('Далее disabled после выбора: '+(txt('Далее').disabled));
+  await click('Далее');s('Далее');
+  await click($$('#app .nv a')[0]);s('меню главная');
+  $$('#app .nv a')[1].click();await wait(40);s('меню профиль');
+  $$('#app .nv a')[2].click();await wait(40);s('меню план');
+  $$('#app .nv a')[3].click();await wait(40);s('меню чат');
+  const ta=$('#app .ta'),sn=$('#app .sn');
+  const ask=async(q,ms)=>{setv(ta,q);sn.click();await wait(ms);log.push('чат «'+q+'» → '+$$('#app .ms>*').slice(-1)[0].textContent.trim().slice(0,60)+' | узлов '+$$('#app .ms>*').length+' disabled='+sn.disabled)};
+  await ask('как отучить от лая',1800);
+  await ask('кот',1800);log.push('нет оценки у вопроса не про собаку: '+!$$('#app .ms>*').slice(-1)[0].textContent.includes('Полезно'));await ask('нет ответа',1800);await ask('укус',1800);await ask('сбой',1800);await ask('таймаут',3000);
+  }catch(e){log.push('EXC '+e.stack.split('\n').slice(0,3).join(' ')+' | html '+$('#app form')?.outerHTML.replace(/<svg.*?<\/svg>/g,'').slice(0,900))}
+  return log.join('\n');
+};1

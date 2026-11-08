@@ -1,0 +1,200 @@
+/* Прототип: те же токены и компоненты, что на макетах; ниже только адаптив */
+:root{--bg:#ffffff;--blue:#3352a3;--ink:#1b2440;--sub:#59617f;--line:rgba(27,36,64,.1);--shell:#e9e7e1;--lime:#e3f4a2;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--g:16px}
+html,body{height:100%;overflow:hidden;background:var(--bg);overscroll-behavior:none}
+body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+#stage{height:100%;display:flex}
+#app{position:relative;flex:1;min-width:0;height:100%;overflow:hidden;container:app/size;background:var(--bg)}
+#panel{display:none}
+#kbd{display:none}
+
+/* экран заполняет телефон */
+#app .ph{position:relative;width:100%;height:100%;border:0;border-radius:0;box-shadow:none;overflow:hidden;padding-top:var(--sat);padding-bottom:var(--sab);box-sizing:border-box;background-color:var(--bg)}
+#app .ph.g{background-color:var(--blue)}
+#app .ph:has(>.nv){padding-bottom:0}
+#app .nv{flex:none;height:auto;min-height:76px;padding:8px max(8px,env(safe-area-inset-left,0px)) calc(12px + var(--sab)) max(8px,env(safe-area-inset-right,0px));box-sizing:border-box;align-items:start}
+#app .nv a{min-width:0;line-height:1.15;padding:0 2px;-webkit-user-select:none;user-select:none}
+#app .nv a.off{pointer-events:none}
+#app .hd{flex:none;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* прокрутка: шапка и меню на месте, контент едет */
+#app .mn,#app .ms,#app .ce{scrollbar-width:none;flex:1 1 0;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#app .mn{padding-left:max(var(--pad,16px),env(safe-area-inset-left,0px));padding-right:max(var(--pad,16px),env(safe-area-inset-right,0px))}
+#app .g .mn{--pad:24px}
+#app .hn,#app .nx,#app .cd,#app .wg,#app form.mn>*,#app .dl,#app .sec{flex:none}
+#app .tl{margin-top:auto;flex:none}
+#app .mn[style*="justify-content: center"]{justify-content:safe center!important}
+#app .eslot{flex:none}
+
+/* вход */
+#app .tx,#app .q{max-width:100%;box-sizing:border-box}
+#app .s1a{min-height:110px}
+#app .s1a,#app .s5 .art,#app .pic-b{position:relative;overflow:hidden}
+#app .s1a>.dg,#app .s5 .art>.dg,#app .pic-b>.dg{position:absolute;inset:0;margin:auto;width:auto!important;height:auto!important;max-width:100%;max-height:min(100%,var(--mh))}
+#app .s1a>.dg{--mh:250px}
+#app .s5 .art>.dg{--mh:290px}
+#app .pic-b>.dg{--mh:125px;max-width:min(100%,164px)}
+#app .ph>div[style*="padding: 16px 24px 32px"]{flex:none}
+
+/* форма профиля: «Готово» всегда над меню */
+#app .ph form.mn{padding-bottom:0;scroll-padding-bottom:84px;background:inherit}
+#app .ph form.mn:not(:has(.pl))>.b1.w:last-child{position:sticky;left:auto;right:auto;bottom:12px;z-index:3;width:100%;flex:none;margin-top:8px}
+#app .ph form.mn:not(:has(.pl))::after{content:"";position:sticky;bottom:0;z-index:3;flex:none;height:12px;background:inherit}
+#app .iw .in{width:100%}
+#app .cx{height:auto;padding-top:8px;padding-bottom:8px}
+#app .miss>.et{white-space:nowrap}
+
+/* S4b, S5, S9, E6: иллюстрация уступает место контенту */
+#app .pic-b{flex:1 0 136px!important;min-height:136px}
+#app .s5 .art{flex:1 1 0;min-height:116px}
+#app .s5 .mn .b1{position:sticky;bottom:0;flex:none}
+@container app (max-width:399px){#app .s5 .tx br,#app .qc .q br{display:none}}
+#app .im[style*="height: 200px"]{height:min(200px,30cqh)!important}
+#app .ce{display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding:16px max(24px,env(safe-area-inset-left,0px))}
+#app .edog{width:min(190px,46cqw);flex:none}
+#app .ce .b1{flex:none}
+
+/* календарь */
+#app .iw .in[readonly]{cursor:pointer;caret-color:transparent}
+#app .iw .cal{cursor:pointer}
+#app .iw.open .in{outline:2px solid var(--blue);outline-offset:2px}
+#app .fl:has(.dp){position:relative;z-index:4}
+#app .dp{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:5;padding:12px 10px 10px;border-radius:16px;background:#ffffff;box-shadow:0 2px 6px rgba(27,36,64,.08),0 16px 32px -12px rgba(27,36,64,.35);color:var(--ink)}
+#app .dp-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 2px 8px}
+#app .dp-h b{font-size:16px;font-weight:600}
+#app .dp-n{display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:0;border-radius:999px;background:#ffffff;color:var(--ink);box-shadow:0 1px 2px rgba(27,36,64,.08),0 4px 10px -4px rgba(27,36,64,.18);cursor:pointer}
+#app .dp-n:first-child svg{transform:scaleX(-1)}
+#app .dp-n:disabled{color:#a9adbf;background:#f8f6f0;box-shadow:none;cursor:default}
+#app .dp-w,#app .dp-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+#app .dp-w span{padding:4px 0;font-size:12px;font-weight:500;color:var(--sub);text-align:center}
+#app .dp-d{height:38px;padding:0;border:0;border-radius:12px;background:none;color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+#app .dp-d.td{box-shadow:inset 0 0 0 1.5px var(--blue)}
+#app .dp-d.on{background:#dedaf7;font-weight:600;box-shadow:none}
+#app .dp-d:disabled{color:#a9adbf;cursor:default}
+#app .dp-d:not(:disabled):not(.on):active{background:#f8f6f0}
+@container app (max-width:359px){#app .dp-d{height:34px;font-size:14px}}
+
+/* опрос */
+#app .ph .ft{flex:none;padding-bottom:calc(20px + var(--sab));background:none}
+#app .ph:has(>.ft){padding-bottom:0}
+
+/* чат: плашка уезжает вместе с сообщениями, поле всегда под рукой */
+#app .ms{justify-content:flex-start;padding:4px 16px 12px}
+/* чат: дисклеймер закреплён над лентой, сообщения прижаты к низу и прокручиваются под ним */
+#app .ph>.sf{flex:none}
+#app .ms{justify-content:flex-start}
+#app .ms>:first-child{margin-top:auto}
+#app .ms>*{flex:none}
+#app .ph .ip{flex:none;padding-top:8px;padding-bottom:10px}
+#app .ta{display:block;max-height:128px;overflow-y:auto;resize:none}
+#app .mu,#app .ma,#app .dl dd,#app .hn .nm{overflow-wrap:anywhere}
+#app .ma.ur{max-width:88%}
+#app .fb textarea{width:100%;box-sizing:border-box}
+#app .ms .ma[role=alert] .b2{min-height:36px;padding:0 14px;border-radius:10px;font-size:14px;font-weight:600}
+
+/* нажатия и фокус */
+#app button,#app a,#app label{touch-action:manipulation}
+#app .b1:active,#app .b2:active,#app .nx:active,#app .cd:not(.off):active,#app .wg:active{transform:scale(.985)}
+#app :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+#app .g :focus-visible{outline-color:var(--lime)}
+#app .ir .ta:focus,#app .ir .ta:focus-visible{outline:none}
+#app .ir:focus-within{outline:2px solid var(--blue);outline-offset:2px}
+#app .dt i{animation:dot 1s infinite ease-in-out}
+#app .dt i:nth-child(2){animation-delay:.15s}
+#app .dt i:nth-child(3){animation-delay:.3s}
+#app [aria-busy="true"] svg{animation:turn 1s linear infinite}
+@keyframes dot{50%{transform:translateY(-3px)}}
+@keyframes turn{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#app .dt i,#app [aria-busy="true"] svg{animation:none}}
+
+/* клавиатура: меню прячется, контент не теряется */
+/* текст в полях не меньше 16px, иначе iPhone увеличивает страницу при вводе */
+#app .ta,#app .bs textarea{font-size:16px}
+#app.kb .nv,#app.kb .aiw{display:none}
+#app .bs{padding-bottom:calc(28px + var(--sab));max-height:calc(100% - 8px);box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain}
+@container app (max-height:420px){#app .bs{gap:8px;padding-top:12px}#app .bs textarea{min-height:56px}}
+@container app (max-height:200px){#app .ph>.hd.hd{height:40px}#app .hd .ic{width:36px;height:36px}#app .ph .ms{padding-top:4px;padding-bottom:4px}#app.kb .ph .ip{padding-top:2px;padding-bottom:4px}}
+#app.kb .bs{padding-bottom:16px}
+#app.kb .ph .ip{padding-bottom:8px}
+#app.kb .ph .ft{padding-bottom:12px}
+#app.kb .ph form.mn:not(:has(.pl))>.b1.w:last-child{position:static;margin-bottom:16px}
+#app.kb .ph form.mn:not(:has(.pl))::after{display:none}
+
+/* крупные заголовки не вылезают за край даже при увеличенном шрифте в настройках телефона */
+#app .hero{overflow-wrap:break-word;hyphens:auto}
+/* ряды кнопок под сообщениями в чате переносятся, а не вылезают за край */
+#app .ac,#app .mt{flex-wrap:wrap;row-gap:4px}
+
+/* чат на невысоком экране с клавиатурой: поле ввода и «Отправить» всегда видны */
+#app .ta{max-height:min(128px,20cqh)}
+@container app (max-height:560px){#app.kb .ph>.sf{display:none}}
+@container app (max-height:420px){
+  #app .ph>.hd{height:48px}
+  #app .ph>.sf{margin:8px 16px 0;padding:8px 12px;font-size:12px;line-height:1.35}
+  #app .ph>.sf br{display:none}
+  #app .ph .ip{padding-top:6px;padding-bottom:6px}
+  #app .aiw{display:none}
+  #app .nv{min-height:56px;padding-top:4px;padding-bottom:calc(6px + var(--sab))}
+}
+
+/* маленькие экраны по ширине */
+@container app (max-width:359px){
+  #app .hero{font-size:36px}
+  #app .s5 .hero{font-size:32px!important}
+  #app .hn .nm{font-size:44px}
+  #app .s5 .tx{width:100%}
+  #app .nv a{font-size:10.5px}
+  #app .nv a::before{width:48px}
+  #app .dl{grid-template-columns:104px minmax(0,1fr);font-size:14px}
+  #app .fl>label,#app legend{font-size:13px}
+  #app .miss>.et{font-size:11.5px}
+  #app .s11{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+  #app .ph .ft .b1,#app .ph .ft .b0{min-width:128px}
+}
+@container app (max-width:379px){
+  #app .miss>.et svg{display:none}
+}
+/* большие экраны */
+@container app (min-width:414px){
+  #app .hero{font-size:50px}
+  #app .hn .nm{font-size:56px}
+}
+/* невысокие экраны */
+@container app (max-height:640px){
+  #app .hd{height:56px}
+  #app .g .mn{gap:12px!important}
+  #app .hero{line-height:.98}
+  #app .nx{padding-top:10px;padding-bottom:10px}
+}
+
+/* телефон в горизонтальном положении */
+@container app (max-height:460px){
+  #app .s1a{flex:none;height:150px}
+  #app .s5 .art{flex:none;height:150px}
+  #app .pic-b{flex:none!important;height:150px}
+}
+
+/* всплывающая подсказка */
+#toast{position:absolute;z-index:9;left:16px;right:16px;bottom:calc(92px + var(--sab));padding:12px 14px;border-radius:12px;background:var(--ink);color:#fbf6ec;font-size:14px;line-height:1.35;text-align:center;opacity:0;transform:translateY(6px);transition:.18s;pointer-events:none}
+#toast.on{opacity:1;transform:none}
+
+/* оболочка на широком экране: телефон и пульт */
+@media (min-width:760px) and (min-height:560px){
+  html,body{background:var(--shell)}
+  #stage{align-items:center;justify-content:center;gap:40px;padding:24px;box-sizing:border-box}
+  #panel{display:flex;flex-direction:column;gap:18px;width:280px;max-height:100%;overflow:auto;flex:none;padding:4px}
+  #frame{position:relative;flex:none;width:var(--fw);height:var(--fh);transform:scale(var(--fs,1));transform-origin:center;border-radius:40px;background:#fff;box-shadow:0 0 0 8px var(--ink),0 24px 60px -24px rgba(27,36,64,.5);overflow:hidden;display:flex;flex-direction:column}
+  #app{flex:1 1 0;height:auto;min-height:0}
+  #frame.kbsim #kbd{display:flex;flex:none;height:var(--kh);align-items:center;justify-content:center;background:#d5d8df;color:#59617f;font-size:13px}
+  #frame.kbsim #app{--sab:0px}
+}
+@media (max-width:759px),(max-height:559px){#frame{display:contents}}
+#panel h1{margin:0;font-family:Oswald,Impact,sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;color:var(--blue)}
+#panel p{margin:0;font-size:13px;line-height:1.45;color:var(--sub)}
+#panel h2{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--sub)}
+#panel .seg{display:grid;gap:6px}
+#panel button{font:inherit;font-size:13.5px;text-align:left;border:0;border-radius:10px;padding:9px 12px;background:#fff;color:var(--ink);cursor:pointer;box-shadow:inset 0 0 0 1px var(--line)}
+#panel button[aria-pressed="true"]{background:#dedaf7;box-shadow:none;font-weight:600}
+#panel button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+#panel .list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#panel .list button{padding:7px 10px;font-size:12.5px}
+#panel code{font-family:Onest,system-ui,sans-serif;font-weight:600;color:var(--ink)}
