@@ -13,7 +13,7 @@ const LONG='Барбарисочка Лапушка Длинноим';
 const LONGMSG='Собака '+'очень'.repeat(40)+' долго не спит ночью, когда остаётся одна, и скулит под дверью уже вторую неделю подряд';
 const P=()=>window.__p;
 const filled=()=>({name:'Васёк',age:'старше 7 лет',sex:'мальчик',date:'07.07.2026',from:'из приюта',first:'нет, раньше были собаки'});
-function base(o){const s={profile:'none',survey:'none',draft:{},score:null,chat:[],greeted:false};return Object.assign(s,o)}
+function base(o){const s={profile:'none',survey:'none',draft:{},pos:'aq:vv',ans:{},vv:{},free:{},chat:[],greeted:false};return Object.assign(s,o)}
 async function show(r,st){P().st=st;P().go(r,{back:true,keep:true});await wait(60)}
 const GREET='Привет! Я ИИ-помощник по вопросам ухода за питомцем. Помогу разобраться в вашем вопросе. <br>Что вас интересует?';
 const ANS='[Текст ответа ассистента по материалам книг: пояснение и шаги]';
@@ -41,8 +41,15 @@ const STATES=[
  ['S4b первый',0,()=>show('s4b',base({profile:'done',draft:{...filled(),name:LONG,from:'от прежних хозяев',first:'нет, сейчас в доме есть и другие собаки'}}))],
  ['S4b повторный',0,()=>show('s4b',base({profile:'done',survey:'started',draft:filled()}))],
  ['S5',0,()=>show('s5',base({profile:'done',draft:filled()}))],
- ['S6',0,()=>show('s6',base({profile:'done',survey:'started',draft:filled()}))],
- ['S6 выбрано',0,()=>show('s6',base({profile:'done',survey:'started',score:10,draft:filled()}))],
+ ['Введение',1,()=>show('aq:vv',base({profile:'done',survey:'started',draft:filled()}))],
+ ['Введение ошибки',1,async()=>{await show('aq:vv',base({profile:'done',survey:'started',draft:filled()}));$('#app .ft .b1').click();await wait(30)}],
+ ['Введение не из приюта',1,()=>show('aq:vv',base({profile:'done',survey:'started',draft:{...filled(),from:'от заводчика'}}))],
+ ['Перебивка 1',0,()=>show('aq:pb:1',base({profile:'done',survey:'started',draft:filled()}))],
+ ['Вступление длинное',0,()=>show('aq:in:4',base({profile:'done',survey:'started',draft:filled()}))],
+ ['Вопрос',0,()=>show('aq:q:1',base({profile:'done',survey:'started',draft:filled()}))],
+ ['Длинный вопрос, X',0,()=>show('aq:q:16',base({profile:'done',survey:'started',draft:filled(),ans:{16:'X'}}))],
+ ['Свободный ответ',1,async()=>{await show('aq:fr:8',base({profile:'done',survey:'started',draft:filled(),free:{8:LONGMSG}}))}],
+ ['Перебивка 8',0,()=>show('aq:pb:8',base({profile:'done',survey:'started',draft:filled()}))],
  ['S9',0,()=>show('s9',base({profile:'done',survey:'done',draft:filled()}))],
  ['Чат пустой',1,()=>show('chat',base({profile:'done',draft:filled()}))],
  ['Чат все сообщения',1,async()=>{await show('chat',base({profile:'done',draft:filled(),greeted:true,chat:chatAll()}));

@@ -31,7 +31,7 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 #app .s1a,#app .s5 .art,#app .pic-b{position:relative;overflow:hidden}
 #app .s1a>.dg,#app .s5 .art>.dg,#app .pic-b>.dg{position:absolute;inset:0;margin:auto;width:auto!important;height:auto!important;max-width:100%;max-height:min(100%,var(--mh))}
 #app .s1a>.dg{--mh:250px}
-#app .s5 .art>.dg{--mh:290px}
+#app .s5 .art>.dg{--mh:200px}
 #app .pic-b>.dg{--mh:125px;max-width:min(100%,164px)}
 #app .ph>div[style*="padding: 16px 24px 32px"]{flex:none}
 
@@ -45,9 +45,9 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 
 /* S4b, S5, S9, E6: иллюстрация уступает место контенту */
 #app .pic-b{flex:1 0 136px!important;min-height:136px}
-#app .s5 .art{flex:1 1 0;min-height:116px}
+#app .s5 .art{flex:0 1 200px;min-height:116px}
 #app .s5 .mn .b1{position:sticky;bottom:0;flex:none}
-@container app (max-width:399px){#app .s5 .tx br,#app .qc .q br{display:none}}
+@container app (max-width:399px){#app .qc .q br{display:none}}
 #app .im[style*="height: 200px"]{height:min(200px,30cqh)!important}
 #app .ce{display:flex;flex-direction:column;align-items:center;justify-content:safe center;padding:16px max(24px,env(safe-area-inset-left,0px))}
 #app .edog{width:min(190px,46cqw);flex:none}
@@ -198,3 +198,18 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 #panel .list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 #panel .list button{padding:7px 10px;font-size:12.5px}
 #panel code{font-family:Onest,system-ui,sans-serif;font-weight:600;color:var(--ink)}
+
+/* перебивка анкеты: на невысоком экране собака и отступы сжимаются, текст не заходит под кнопку */
+#app .sup{flex:1 1 0;min-height:0;overflow-y:auto;scrollbar-width:none;overscroll-behavior:contain;padding-top:clamp(16px,9cqh,88px);padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+#app .sup>*{flex:none}
+#app .sup .sa{height:clamp(96px,26cqh,220px)}
+#app .sup .sa img{max-height:min(220px,100%)}
+#app .sup .sec-t{margin-top:clamp(14px,3.6cqh,32px)}
+@container app (max-height:640px){#app .sup .sec-t{font-size:30px}}
+/* анкета: экраны вопросов прокручиваются, ползунок справа поверх */
+#app .ph>.sb{z-index:2;pointer-events:none}
+@container app (max-height:460px){#app .sup{padding-top:12px}#app .sup .sa{height:84px}}
+/* название раздела анкеты: длинное слово не вылезает за край на узком экране и при крупном шрифте */
+#app .sec-t{overflow-wrap:break-word;hyphens:auto}
+@container app (max-width:359px){#app .mn.anq .sec-t{font-size:34px}}
+#app .sup>*{max-width:100%}

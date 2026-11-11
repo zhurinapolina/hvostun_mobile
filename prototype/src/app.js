@@ -1,7 +1,7 @@
 (function(){
 const T=window.__T, ICON=window.__ICON;
 const app=document.getElementById('app'), frame=document.getElementById('frame'), toastEl=document.getElementById('toast');
-const blank=()=>({profile:'none',survey:'none',draft:{},score:null,chat:[],greeted:false});
+const blank=()=>({profile:'none',survey:'none',draft:{},pos:'aq:vv',ans:{},vv:{},free:{},chat:[],greeted:false});
 let st=blank(), cur='s1', stack=[], busy=false, timers=[];
 const later=(fn,ms)=>{const t=setTimeout(fn,ms);timers.push(t);return t};
 const clearTimers=()=>{timers.forEach(clearTimeout);timers=[]};
@@ -11,7 +11,7 @@ function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout
 function homeKey(){if(st.profile==='none')return 'a';if(st.profile==='partial')return 'a2';if(st.survey==='none')return 'b';return st.survey==='started'?'c':'d'}
 function navHTML(active){
   const ready=st.profile==='done', plan=ready&&st.survey!=='none';
-  const items=[['home','Главная',true],['profile','Профиль',ready||active==='profile'],['plan','План адаптации',plan||active==='plan'],['chat','Чат',ready]];
+  const items=[['home','Главная',true],['profile','Профиль',ready||active==='profile'],['plan','План',plan||active==='plan'],['chat','Чат',ready]];
   return '<nav class="nv" aria-label="Меню">'+items.map(([r,l,ok])=>{
     if(r===active)return `<a class="on" data-r="${r}" aria-current="page">${l}</a>`;
     return ok?`<a data-r="${r}">${l}</a>`:`<a class="off" aria-disabled="true">${l}</a>`}).join('')+'</nav>';
@@ -21,7 +21,7 @@ const wide=()=>window.matchMedia('(min-width:760px) and (min-height:560px)').mat
 function reveal(el){const sc=el.parentElement&&el.parentElement.closest('.mn,.ms,.ce');if(!sc)return;const r=el.getBoundingClientRect(),s=sc.getBoundingClientRect();sc.scrollTop+=(r.top+r.height/2)-(s.top+s.height/2)}
 const CSS=window.__CSS,sheet=document.getElementById('board');let sheetKey='';
 function useSheet(key){
-  const k=key.startsWith('h_')?'home':key.startsWith('s4b')?'s4b':key;
+  const k=key.startsWith('h_')?'home':key.startsWith('s4b')?'s4b':key.startsWith('aq_')?'anq':/^pb\d$/.test(key)?'pb':key;
   if(k===sheetKey)return;sheetKey=k;
   sheet.textContent=CSS.screens[k].map(i=>CSS.pool[i]).join('');
 }
@@ -44,11 +44,11 @@ function saveDraft(){
 function go(r,o={}){
   if(cur==='s4'&&r!=='s4'&&!o.keep)saveDraft();
   clearTimers();busy=false;
-  if(r==='plan')r=st.survey==='none'?'s5':st.survey==='started'?'s6':'s9';
+  if(r==='plan')r=st.survey==='none'?'s5':st.survey==='started'?(st.pos||'aq:vv'):'s9';
   if(r==='profile')r=st.profile==='done'?'s4b':'s4';
   if(r==='home')r='s3';
   if(!o.back&&cur!==r){stack.push(cur);try{history.pushState({n:stack.length},'')}catch(e){}}
-  cur=r;({s1:s1,s2:s2,s3:s3,s4:s4,s4b:s4b,s5:s5,s6:s6,s9:s9,chat:chat,e6:e6})[r](o);
+  cur=r;if(r.startsWith('aq:')){st.pos=r;anketa(r)}else({s1:s1,s2:s2,s3:s3,s4:s4,s4b:s4b,s5:s5,s9:s9,chat:chat,e6:e6})[r](o);
   paintPanel();
 }
 function s1(){mount('s1')}
@@ -69,7 +69,8 @@ function s2(o){
   });
   if(o.err)$('.eslot',p).innerHTML=T.e2;
 }
-function s3(){const k=homeKey();const p=mount('h_'+k,'home');const nm=$('.hn .nm',p);if(nm&&st.draft.name){nm.textContent=st.draft.name;fitName()}}
+function s3(){const k=homeKey();const p=mount('h_'+k,'home');const nm=$('.hn .nm',p);if(nm&&st.draft.name){nm.textContent=st.draft.name;fitName()}
+  if(k==='c'){const d=$$('.wg .d',p).find(e=>/из 42/.test(e.textContent));if(d)d.textContent=where()+', продолжить'}}
 /* длинная кличка уменьшается, чтобы помещаться в строку, и переносится только если совсем не влезает */
 function fitName(){
   const el=$('.hn .nm');if(!el)return;el.style.fontSize='';el.style.whiteSpace='nowrap';
@@ -99,14 +100,88 @@ function fillProfile(p){
   const val=[d.name,d.age,d.sex,d.date,d.from,d.first];
   rows.forEach((r,i)=>{if(val[i])r.textContent=val[i]});
 }
-function s5(){const p=mount('s5','plan');$('.b1',p).addEventListener('click',e=>{e.preventDefault();st.survey='started';go('s6')})}
-function s6(){
-  const p=mount('s6');const btn=$('.ft .b0,.ft .b1',p);
-  const paint=()=>{$$('.s11 button',p).forEach(b=>{const on=+b.textContent===st.score;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
-    const ok=st.score!==null;btn.className=ok?'b1':'b0';btn.disabled=!ok};
-  paint();
-  $$('.s11 button',p).forEach(b=>b.addEventListener('click',()=>{st.score=+b.textContent;paint()}));
-  btn.addEventListener('click',()=>{if(st.score===null)return;st.survey='done';go('s9')});
+function s5(){const p=mount('s5','plan');$('.b1',p).addEventListener('click',e=>{e.preventDefault();if(st.survey==='none'){st.survey='started';st.pos='aq:vv'}go('plan')})}
+/* анкета: «Введение» одной формой, 7 разделов C-BARQ (вступление, вопрос на экран, свободный ответ), перебивка после каждого раздела.
+   Позиция — маршрут aq:vv | aq:pb:N | aq:in:N | aq:q:N | aq:fr:N; ответы сохраняются сразу, «×» ведёт на главную C */
+const Q=window.__Q,SEC=Q.s,START=[];{let n=1;SEC.forEach((s,i)=>{START[i]=n;n+=s.q.length})}
+const secOf=n=>{for(let i=SEC.length-1;i>=0;i--)if(n>=START[i])return i;return 0};
+const plural=n=>n%10===1&&n%100!==11?'вопрос':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'вопроса':'вопросов';
+function where(){const[,k,v]=(st.pos||'aq:vv').split(':'),n=+v;
+  if(k==='q')return `Вопрос ${n} из 42`;if(k==='vv')return 'Раздел 1 из 8';if(k==='pb')return `Раздел ${Math.min(n+1,8)} из 8`;return `Раздел ${n} из 8`}
+function prevOf(r){const[,k,v]=r.split(':'),n=+v;
+  if(k==='vv')return 's5';if(k==='in')return n===2?'aq:vv':`aq:fr:${n-1}`;
+  if(k==='q'){const i=secOf(n);return n===START[i]?`aq:in:${i+2}`:`aq:q:${n-1}`}
+  if(k==='fr'){const i=n-2;return `aq:q:${START[i]+SEC[i].q.length-1}`}return null}
+function nextOf(r){const[,k,v]=r.split(':'),n=+v;
+  if(k==='vv')return 'aq:pb:1';if(k==='pb')return n<8?`aq:in:${n+1}`:null;if(k==='in')return `aq:q:${START[n-2]}`;
+  if(k==='q'){const i=secOf(n);return n<START[i]+SEC[i].q.length-1?`aq:q:${n+1}`:`aq:fr:${i+2}`}
+  if(k==='fr')return `aq:pb:${n}`;return null}
+function ft(p,r,ok){
+  const b=$('.ft .b2',p),n=$('.ft .b1,.ft .b0',p);
+  if(b){b.removeAttribute('data-r');b.removeAttribute('href');b.setAttribute('role','button');b.tabIndex=0;b.addEventListener('click',e=>{e.preventDefault();const pr=prevOf(r);if(pr)go(pr)})}
+  const set=v=>{if(!n)return;n.className=v?'b1':'b0';n.disabled=!v};set(ok);return {next:n,set};
+}
+/* ползунок прокрутки как на макете: тонкая полоска справа, длина — видимая доля, двигается вместе с текстом */
+function sbar(p){
+  const mn=$('.mn.anq,.mn.vv',p);if(!mn)return;const sb=document.createElement('i');sb.className='sb';sb.setAttribute('aria-hidden','true');p.append(sb);
+  const upd=()=>{const ch=mn.clientHeight,sh=mn.scrollHeight;if(sh<=ch+2){sb.style.display='none';return}sb.style.display='';
+    const tr=ch-12,h=Math.max(28,Math.round(tr*ch/sh)),y=mn.offsetTop+6+Math.round((tr-h)*mn.scrollTop/(sh-ch));sb.style.top=y+'px';sb.style.height=h+'px'};
+  mn.addEventListener('scroll',upd,{passive:true});new ResizeObserver(upd).observe(mn);upd();
+}
+function anketa(r){
+  const[,k,v]=r.split(':'),n=+v;
+  if(k==='vv')return vvForm(r);
+  if(k==='pb'){const p=mount('pb'+n);const b=$('.ft .b1',p);b.addEventListener('click',()=>{if(n<8)go(nextOf(r));else{st.survey='done';st.pos=null;go('s9')}});return}
+  if(k==='in'){const s=SEC[n-2],p=mount('aq_in');const m=$('.mn.anq',p);
+    m.innerHTML=`<p class="st">Раздел ${n} из 8 · ${s.q.length} ${plural(s.q.length)}</p><h1 class="sec-t">${s.t}</h1>${s.in}`;
+    ft(p,r,true).next.addEventListener('click',()=>go(nextOf(r)));sbar(p);return}
+  if(k==='fr'){const s=SEC[n-2],p=mount('aq_fr');const m=$('.mn.anq',p);
+    m.innerHTML=`<p class="st">Раздел ${n} из 8 · ${s.t}</p><label class="fl-h" for="fr${n}">${s.fl}</label><p class="fl-c">${s.fh}</p><textarea class="free" id="fr${n}" maxlength="2000"></textarea>`;
+    const ta=$('textarea',m);ta.value=st.free[n]||'';ta.addEventListener('input',()=>st.free[n]=ta.value);
+    ft(p,r,true).next.addEventListener('click',()=>go(nextOf(r)));sbar(p);return}
+  if(k==='q'){const i=secOf(n),s=SEC[i],q=s.q[n-START[i]],p=mount('aq_q');const m=$('.mn.anq',p);
+    const ops=s.sc.map((o,j)=>[String(j),o]).concat([['X',Q.x]]);
+    m.innerHTML=`<p class="st">Вопрос ${n} из 42 · ${s.t}</p><div class="pg" role="progressbar" aria-valuenow="${n}" aria-valuemin="0" aria-valuemax="42" aria-label="Прогресс анкеты"><i style="width: ${(n/42*100).toFixed(1)}%"></i></div>`+
+      `<div class="qc plain" role="group" aria-labelledby="q${n}"><p class="q${q.length>110?' long':''}" id="q${n}">${q}</p><div class="ops" role="radiogroup" aria-labelledby="q${n}">`+
+      ops.map(([c,o])=>`<label class="op${c==='X'?' x':''}" role="radio" tabindex="0" aria-checked="false" data-v="${c}"><span class="n" aria-hidden="true">${c}</span><span>${o}</span></label>`).join('')+'</div></div>';
+    const f=ft(p,r,!s.req||st.ans[n]!=null);
+    const paint=()=>{$$('.op',m).forEach(o=>{const on=o.dataset.v===st.ans[n];o.classList.toggle('on',on);o.setAttribute('aria-checked',on)});f.set(!s.req||st.ans[n]!=null)};
+    $$('.op',m).forEach(o=>{const pick=()=>{st.ans[n]=o.dataset.v;paint()};o.addEventListener('click',pick);
+      o.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();pick()}})});
+    paint();f.next.addEventListener('click',()=>{if(f.next.disabled)return;go(nextOf(r))});sbar(p);return}
+}
+/* «Введение»: одна форма; вопрос о сроке в приюте — только если в профиле «Откуда собака» = «из приюта» (или не заполнено) */
+function vvForm(r){
+  const p=mount('vv'),f=$('form.mn',p);f.addEventListener('submit',e=>e.preventDefault());
+  const shelter=!st.draft.from||st.draft.from==='из приюта';
+  $$('fieldset',f).forEach((fs,i)=>{fs.dataset.k='f'+i;if(!shelter&&/в приюте/.test($('legend',fs).textContent))fs.remove()});
+  $$('.fl',f).forEach((fl,i)=>{fl.dataset.k='t'+i});
+  $$('input.in,textarea',f).forEach(el=>{const k=el.closest('.fl').dataset.k;if(st.vv[k])el.value=st.vv[k];
+    el.addEventListener('input',()=>{st.vv[k]=el.value;clr(el.closest('.fl'))})});
+  const ppl=$$('input.in',f)[0];ppl.setAttribute('inputmode','numeric');ppl.maxLength=2;
+  ppl.addEventListener('input',()=>{const v=ppl.value.replace(/\D/g,'');if(v!==ppl.value){ppl.value=v;st.vv[ppl.closest('.fl').dataset.k]=v}});
+  /* вес и рост — только цифры: вес с одной десятичной (4,5 кг), рост в целых сантиметрах */
+  $$('.fl',f).forEach(fl=>{const lb=fl.querySelector('label')?.textContent||'',el=fl.querySelector('input.in');if(!el)return;
+    const kg=/вес/i.test(lb),cm=/рост/i.test(lb);if(!kg&&!cm)return;
+    el.setAttribute('inputmode',kg?'decimal':'numeric');el.maxLength=kg?5:3;el.autocomplete='off';
+    el.addEventListener('input',()=>{let v=el.value.replace(/\./g,',');
+      if(kg){v=v.replace(/[^\d,]/g,'').replace(/^,+/,'');const i=v.indexOf(',');if(i>=0)v=v.slice(0,i+1)+v.slice(i+1).replace(/,/g,'').slice(0,1)}else v=v.replace(/\D/g,'');
+      if(v!==el.value){el.value=v;st.vv[fl.dataset.k]=v}})});
+  $$('fieldset',f).forEach(fs=>{const k=fs.dataset.k;$$('input[type=radio]',fs).forEach(rd=>{rd.name=k;rd.value=rd.parentElement.textContent.trim();
+    if(st.vv[k]===rd.value){rd.checked=true}rd.addEventListener('change',()=>{st.vv[k]=rd.value;mark(fs);clr(fs)})});mark(fs)});
+  function mark(fs){$$('.cx',fs).forEach(l=>{const on=l.querySelector('input').checked;l.classList.toggle('on',on);const s=l.querySelector('svg');if(on&&!s)l.querySelector('input').insertAdjacentHTML('afterend',ICON.check);if(!on&&s)s.remove()})}
+  function clr(el){el.classList.remove('miss');el.querySelector(':scope>.et')?.remove();$('.in.er,.cs.er',el)?.classList.remove('er')}
+  function err(el,txt){clr(el);el.classList.add('miss');el.insertAdjacentHTML('beforeend',`<div class="et" role="alert">${ICON.warn}<span>${txt}</span></div>`);fitErr(el)}
+  const fb=ft(p,r,true);
+  fb.next.addEventListener('click',()=>{
+    const bad=[];const v=ppl.value.trim();
+    if(!v||!(+v>=1)){err(ppl.closest('.fl'),'Укажите число');bad.push(ppl.closest('.fl'))}
+    const br=$$('fieldset',f).find(fs=>/Метис/.test($('legend',fs).textContent));
+    if(br&&!$('input:checked',br)){err(br,'Выберите вариант');bad.push(br)}
+    if(bad.length){reveal(bad[0]);return}
+    go(nextOf(r));
+  });
+  sbar(p);
 }
 function s9(){mount('s9','plan')}
 function e6(){const p=mount('e6');$('.ce .b1',p).addEventListener('click',()=>go('s3'))}
@@ -313,9 +388,9 @@ function device(){
   frame.style.setProperty('--fs',Math.min(1,(window.innerHeight-48)/d.h));
   paintPanel();
 }
-const JUMP=[['S1','s1',{}],['S2','s2',{}],['E2','s2',{err:1}],['Главная A','s3',{}],['A2','s3',{profile:'partial'}],['B','s3',{profile:'done'}],['C','s3',{profile:'done',survey:'started'}],['D','s3',{profile:'done',survey:'done'}],['S4','s4',{}],['S4b, первый','s4b',{profile:'done'}],['S4b, повторный','s4b',{profile:'done',survey:'started'}],['S5','s5',{profile:'done'}],['S6','s6',{profile:'done',survey:'started'}],['S9','s9',{profile:'done',survey:'done'}],['Чат','chat',{profile:'done'}],['E6','e6',{}]];
+const JUMP=[['S1','s1',{}],['S2','s2',{}],['E2','s2',{err:1}],['Главная A','s3',{}],['A2','s3',{profile:'partial'}],['B','s3',{profile:'done'}],['C','s3',{profile:'done',survey:'started',pos:'aq:q:12'}],['D','s3',{profile:'done',survey:'done'}],['S4','s4',{}],['S4b, первый','s4b',{profile:'done'}],['S4b, повторный','s4b',{profile:'done',survey:'started'}],['S5','s5',{profile:'done'}],['Введение','aq:vv',{profile:'done',survey:'started'}],['Введение, не из приюта','aq:vv',{profile:'done',survey:'started',from:'от заводчика'}],['Перебивка 1','aq:pb:1',{profile:'done',survey:'started'}],['Вступление раздела','aq:in:4',{profile:'done',survey:'started'}],['Вопрос','aq:q:1',{profile:'done',survey:'started'}],['Длинный вопрос','aq:q:16',{profile:'done',survey:'started'}],['Свободный ответ','aq:fr:2',{profile:'done',survey:'started'}],['Последняя перебивка','aq:pb:8',{profile:'done',survey:'started'}],['S9','s9',{profile:'done',survey:'done'}],['Чат','chat',{profile:'done'}],['E6','e6',{}]];
 const SAMPLE={name:'Васёк',age:'старше 7 лет',sex:'мальчик',date:'07.07.2026',from:'из приюта',first:'нет, раньше были собаки'};
-function preset(i){const[, r,o]=JUMP[i];const keep=st.chat;st=Object.assign(blank(),o);st.chat=r==='chat'?keep:[];st.greeted=r==='chat'&&keep.length>0;if(o.profile==='done')st.draft={...SAMPLE};else if(o.profile==='partial')st.draft={name:'Васёк'};stack=[];cur='';go(r,{back:true,err:o.err,keep:true})}
+function preset(i){const[, r,o]=JUMP[i];const keep=st.chat;const{from,...oo}=o;st=Object.assign(blank(),oo);st.chat=r==='chat'?keep:[];st.greeted=r==='chat'&&keep.length>0;if(o.profile==='done')st.draft={...SAMPLE,...(from?{from}:{})};else if(o.profile==='partial')st.draft={name:'Васёк'};stack=[];cur='';go(r,{back:true,err:o.err,keep:true})}
 function paintPanel(){
   const p=document.getElementById('panel');if(!p)return;
   p.querySelectorAll('[data-d]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===dev));

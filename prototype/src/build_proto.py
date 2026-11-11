@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import doodle  # noqa: E402
 
 SRC, PROTO, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
-ORDER = ["V-Main", "V-M-S2-oshibki", "V-M-S3", "V-M-S4", "V-M-S4-pustye", "V-M-S4-dop", "V-M-S5-S9", "V-M-S6-S7",
+ORDER = ["V-Main", "V-M-S2-oshibki", "V-M-S3", "V-M-S4", "V-M-S4-pustye", "V-M-S4-dop", "V-M-S5-S9", "V-M-S7-vvedenie", "V-M-S7", "V-M-S7-perebivki",
          "V-M-C1-C3", "V-M-C4-C7", "V-M-C8-C12", "V-M-global"]
 B = {n: open(f"{SRC}/{n}.dc.html", encoding="utf-8").read() for n in ORDER}
 
@@ -28,7 +28,7 @@ for n in ORDER:
             pool.append(r + "}")
         sheets[n].append(index[r])
 SCREENS = {"s1": ["V-Main"], "s2": ["V-M-S2-oshibki", "V-Main"], "home": ["V-M-S3"], "s4": ["V-M-S4-dop", "V-M-S4", "V-M-S4-pustye"],
-           "s4b": ["V-M-S4-dop"], "s5": ["V-M-S5-S9"], "s9": ["V-M-S5-S9"], "s6": ["V-M-S6-S7"],
+           "s4b": ["V-M-S4-dop"], "s5": ["V-M-S5-S9"], "s9": ["V-M-S5-S9"], "vv": ["V-M-S7-vvedenie"], "anq": ["V-M-S7"], "pb": ["V-M-S7-perebivki"],
            "chat": ["V-M-C8-C12", "V-M-C1-C3", "V-M-C4-C7"], "e6": ["V-M-global"]}
 CSS = {"pool": pool, "screens": {k: sum((sheets[n] for n in v), []) for k, v in SCREENS.items()}}
 
@@ -48,8 +48,8 @@ def phones(n):
     return out
 
 
-ROUTES = {"V-M-S3.dc.html": "home", "V-M-S4-dop.dc.html": "profile", "V-M-S4.dc.html": "s4", "V-M-S5-S9.dc.html": "s5",
-          "V-M-S6-S7.dc.html": "s6", "V-M-C1-C3.dc.html": "chat", "V-Main.dc.html": "s1"}
+ROUTES = {"V-M-S3.dc.html": "home", "V-M-S4-dop.dc.html": "profile", "V-M-S4.dc.html": "s4", "V-M-S5-S9.dc.html": "plan",
+          "V-M-S7.dc.html": "plan", "V-M-C1-C3.dc.html": "chat", "V-Main.dc.html": "s1"}
 
 
 def clean(h):
@@ -76,7 +76,32 @@ d = [clean(p) for p in phones("V-M-S4-dop")]
 T["s4b1"], T["s4b2"] = d[0], d[1]
 T["s5"] = clean(phones("V-M-S5-S9")[0])
 T["s9"] = clean(phones("V-M-S5-S9")[1])
-T["s6"] = clean(phones("V-M-S6-S7")[0]).replace('data-r="s5"', 'data-r="s5"')
+# анкета: форма «Введения», шаблоны вступления, вопроса и свободного ответа, 8 перебивок
+nosb = lambda h: re.sub(r'\n?<i class="sb"[^>]*></i>', "", h)
+T["vv"] = nosb(clean(phones("V-M-S7-vvedenie")[0]))
+a7 = [clean(p) for p in phones("V-M-S7")]
+T["aq_in"], T["aq_q"], T["aq_fr"] = nosb(a7[0]), a7[1], a7[5]
+for i, p in enumerate(phones("V-M-S7-perebivki"), 1):
+    T[f"pb{i}"] = clean(p)
+assert len([k for k in T if k.startswith("pb")]) == 8
+Q = json.load(open(f"{PROTO}/cbarq-questions.json", encoding="utf-8"))
+
+
+def intro_html(text):
+    out, ul = [], []
+    for line in text.split("\n"):
+        if line.startswith("- "):
+            ul.append(f"<li>{line[2:]}</li>"); continue
+        if ul:
+            out.append('<ul class="sec-ul">' + "".join(ul) + "</ul>"); ul = []
+        out.append(f'<p class="sec-tx">{line}</p>')
+    if ul:
+        out.append('<ul class="sec-ul">' + "".join(ul) + "</ul>")
+    return "".join(out)
+
+
+QD = {"x": Q["x"], "s": [{"t": s["title"], "in": intro_html(s["intro"]), "sc": s["scale"], "q": s["questions"], "req": s["required"],
+                         "fl": s["free"]["label"], "fh": s["free"]["hint"]} for s in Q["sections"]]}
 T["chat"] = clean(phones("V-M-C1-C3")[0])
 T["e6"] = clean(phones("V-M-global")[0])
 for k in ("s4b1", "s4b2"):
@@ -99,7 +124,7 @@ html = f"""<title>Хвостун</title>
 <style id="board"></style>
 <style>{app_css}</style>
 <div id="stage"><aside id="panel" aria-label="Настройки просмотра"></aside><div id="frame"><div id="app"><div id="toast" role="status"></div></div><div id="kbd">Клавиатура</div></div></div>
-<script>window.__T={json.dumps(T, ensure_ascii=False)};window.__ICON={json.dumps(ICON, ensure_ascii=False)};window.__CSS={json.dumps(CSS, ensure_ascii=False)};</script>
+<script>window.__T={json.dumps(T, ensure_ascii=False)};window.__ICON={json.dumps(ICON, ensure_ascii=False)};window.__CSS={json.dumps(CSS, ensure_ascii=False)};window.__Q={json.dumps(QD, ensure_ascii=False)};</script>
 <script>{app_js}</script>
 """
 open(OUT, "w", encoding="utf-8").write(html)
