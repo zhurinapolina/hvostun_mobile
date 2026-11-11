@@ -1,0 +1,345 @@
+[
+ {
+  "id": "s1-welcome",
+  "title": "S1 · Приветствие",
+  "group": "Вход",
+  "file": "screens/s1-welcome.html",
+  "route": "s1"
+ },
+ {
+  "id": "s2-login",
+  "title": "S2 · Вход",
+  "group": "Вход",
+  "file": "screens/s2-login.html",
+  "route": "s2"
+ },
+ {
+  "id": "s2-login-error",
+  "title": "S2 · Ошибка входа (E2)",
+  "group": "Вход",
+  "file": "screens/s2-login-error.html",
+  "route": "s2"
+ },
+ {
+  "id": "s2-login-loading",
+  "title": "S2 · Вход: проверка",
+  "group": "Вход",
+  "file": "screens/s2-login-loading.html",
+  "route": "s2"
+ },
+ {
+  "id": "e6-unavailable",
+  "title": "E6 · Сервис временно недоступен",
+  "group": "Ошибки",
+  "file": "screens/e6-unavailable.html",
+  "route": "e6"
+ },
+ {
+  "id": "home-a",
+  "title": "S3 · Главная A: первый вход",
+  "group": "Главная",
+  "file": "screens/home-a.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-a2",
+  "title": "S3 · Главная A2: профиль заполнен частично",
+  "group": "Главная",
+  "file": "screens/home-a2.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-b",
+  "title": "S3 · Главная B: профиль готов",
+  "group": "Главная",
+  "file": "screens/home-b.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-c",
+  "title": "S3 · Главная C: анкета в процессе",
+  "group": "Главная",
+  "file": "screens/home-c.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-d",
+  "title": "S3 · Главная D: анкета пройдена",
+  "group": "Главная",
+  "file": "screens/home-d.html",
+  "route": "s3"
+ },
+ {
+  "id": "s4-empty",
+  "title": "S4 · Профиль: пустая форма",
+  "group": "Профиль",
+  "file": "screens/s4-empty.html",
+  "route": "s4"
+ },
+ {
+  "id": "s4-errors",
+  "title": "S4 · Профиль: все поля не заполнены",
+  "group": "Профиль",
+  "file": "screens/s4-errors.html",
+  "route": "s4"
+ },
+ {
+  "id": "s4-date-future",
+  "title": "S4 · Профиль: дата в будущем",
+  "group": "Профиль",
+  "file": "screens/s4-date-future.html",
+  "route": "s4"
+ },
+ {
+  "id": "s4-calendar",
+  "title": "S4 · Профиль: выбор даты",
+  "group": "Профиль",
+  "file": "screens/s4-calendar.html",
+  "route": "s4"
+ },
+ {
+  "id": "s4-filled",
+  "title": "S4 · Профиль: заполнено",
+  "group": "Профиль",
+  "file": "screens/s4-filled.html",
+  "route": "s4"
+ },
+ {
+  "id": "s4-saving",
+  "title": "S4 · Профиль: сохранение",
+  "group": "Профиль",
+  "file": "screens/s4-saving.html",
+  "route": "s4"
+ },
+ {
+  "id": "s4b-first",
+  "title": "S4b · Вкладка «Профиль», первый заход",
+  "group": "Профиль",
+  "file": "screens/s4b-first.html",
+  "route": "s4b"
+ },
+ {
+  "id": "s4b-repeat",
+  "title": "S4b · Вкладка «Профиль», повторный заход",
+  "group": "Профиль",
+  "file": "screens/s4b-repeat.html",
+  "route": "s4b"
+ },
+ {
+  "id": "s5-survey-start",
+  "title": "S5 · Анкета: вход",
+  "group": "Анкета",
+  "file": "screens/s5-survey-start.html",
+  "route": "s5"
+ },
+ {
+  "id": "s7-intro-form",
+  "title": "S7 · Раздел 1 «Введение»: форма (собака из приюта)",
+  "group": "Анкета",
+  "file": "screens/s7-intro-form.html",
+  "route": "aq:vv"
+ },
+ {
+  "id": "s7-intro-form-not-shelter",
+  "title": "S7 · «Введение»: собака не из приюта — без вопроса о сроке в приюте",
+  "group": "Анкета",
+  "file": "screens/s7-intro-form-not-shelter.html",
+  "route": "aq:vv"
+ },
+ {
+  "id": "s7-intro-form-errors",
+  "title": "S7 · «Введение»: не заполнены обязательные поля",
+  "group": "Анкета",
+  "file": "screens/s7-intro-form-errors.html",
+  "route": "aq:vv"
+ },
+ {
+  "id": "s7-intro-form-filled",
+  "title": "S7 · «Введение»: заполнено",
+  "group": "Анкета",
+  "file": "screens/s7-intro-form-filled.html",
+  "route": "aq:vv"
+ },
+ {
+  "id": "s7-break-1",
+  "title": "S7 · Перебивка после раздела 1",
+  "group": "Анкета",
+  "file": "screens/s7-break-1.html",
+  "route": "aq:pb:1"
+ },
+ {
+  "id": "s7-break-2",
+  "title": "S7 · Перебивка после раздела 2",
+  "group": "Анкета",
+  "file": "screens/s7-break-2.html",
+  "route": "aq:pb:2"
+ },
+ {
+  "id": "s7-break-3",
+  "title": "S7 · Перебивка после раздела 3",
+  "group": "Анкета",
+  "file": "screens/s7-break-3.html",
+  "route": "aq:pb:3"
+ },
+ {
+  "id": "s7-break-4",
+  "title": "S7 · Перебивка после раздела 4",
+  "group": "Анкета",
+  "file": "screens/s7-break-4.html",
+  "route": "aq:pb:4"
+ },
+ {
+  "id": "s7-break-5",
+  "title": "S7 · Перебивка после раздела 5",
+  "group": "Анкета",
+  "file": "screens/s7-break-5.html",
+  "route": "aq:pb:5"
+ },
+ {
+  "id": "s7-break-6",
+  "title": "S7 · Перебивка после раздела 6",
+  "group": "Анкета",
+  "file": "screens/s7-break-6.html",
+  "route": "aq:pb:6"
+ },
+ {
+  "id": "s7-break-7",
+  "title": "S7 · Перебивка после раздела 7",
+  "group": "Анкета",
+  "file": "screens/s7-break-7.html",
+  "route": "aq:pb:7"
+ },
+ {
+  "id": "s7-break-8",
+  "title": "S7 · Перебивка после раздела 8",
+  "group": "Анкета",
+  "file": "screens/s7-break-8.html",
+  "route": "aq:pb:8"
+ },
+ {
+  "id": "s7-section-2-intro",
+  "title": "S7 · Вступление раздела 2",
+  "group": "Анкета",
+  "file": "screens/s7-section-2-intro.html",
+  "route": "aq:in:2"
+ },
+ {
+  "id": "s7-section-3-intro",
+  "title": "S7 · Вступление раздела 3",
+  "group": "Анкета",
+  "file": "screens/s7-section-3-intro.html",
+  "route": "aq:in:3"
+ },
+ {
+  "id": "s7-section-4-intro",
+  "title": "S7 · Вступление раздела 4",
+  "group": "Анкета",
+  "file": "screens/s7-section-4-intro.html",
+  "route": "aq:in:4"
+ },
+ {
+  "id": "s7-section-5-intro",
+  "title": "S7 · Вступление раздела 5",
+  "group": "Анкета",
+  "file": "screens/s7-section-5-intro.html",
+  "route": "aq:in:5"
+ },
+ {
+  "id": "s7-section-6-intro",
+  "title": "S7 · Вступление раздела 6",
+  "group": "Анкета",
+  "file": "screens/s7-section-6-intro.html",
+  "route": "aq:in:6"
+ },
+ {
+  "id": "s7-section-7-intro",
+  "title": "S7 · Вступление раздела 7",
+  "group": "Анкета",
+  "file": "screens/s7-section-7-intro.html",
+  "route": "aq:in:7"
+ },
+ {
+  "id": "s7-section-8-intro",
+  "title": "S7 · Вступление раздела 8",
+  "group": "Анкета",
+  "file": "screens/s7-section-8-intro.html",
+  "route": "aq:in:8"
+ },
+ {
+  "id": "s7-question",
+  "title": "S7 · Вопрос: ответ не выбран, «Далее» неактивна",
+  "group": "Анкета",
+  "file": "screens/s7-question.html",
+  "route": "aq:q:1"
+ },
+ {
+  "id": "s7-question-selected",
+  "title": "S7 · Вопрос: ответ выбран",
+  "group": "Анкета",
+  "file": "screens/s7-question-selected.html",
+  "route": "aq:q:2"
+ },
+ {
+  "id": "s7-question-long-x",
+  "title": "S7 · Длинный вопрос, выбрано «Не наблюдалось»",
+  "group": "Анкета",
+  "file": "screens/s7-question-long-x.html",
+  "route": "aq:q:16"
+ },
+ {
+  "id": "s7-question-frequency",
+  "title": "S7 · Вопрос со шкалой частоты",
+  "group": "Анкета",
+  "file": "screens/s7-question-frequency.html",
+  "route": "aq:q:22"
+ },
+ {
+  "id": "s7-question-optional",
+  "title": "S7 · Необязательный вопрос («Дрессируемость»): «Далее» активна",
+  "group": "Анкета",
+  "file": "screens/s7-question-optional.html",
+  "route": "aq:q:27"
+ },
+ {
+  "id": "s7-free-answer",
+  "title": "S7 · Свободный ответ в конце раздела",
+  "group": "Анкета",
+  "file": "screens/s7-free-answer.html",
+  "route": "aq:fr:2"
+ },
+ {
+  "id": "s7-free-answer-filled",
+  "title": "S7 · Свободный ответ: заполнено",
+  "group": "Анкета",
+  "file": "screens/s7-free-answer-filled.html",
+  "route": "aq:fr:3"
+ },
+ {
+  "id": "s9-plan-stub",
+  "title": "S9 · План: заглушка «Сервис в разработке»",
+  "group": "План",
+  "file": "screens/s9-plan-stub.html",
+  "route": "s9"
+ },
+ {
+  "id": "chat-empty",
+  "title": "S10 · Чат: первое открытие",
+  "group": "Чат",
+  "file": "screens/chat-empty.html",
+  "route": "chat"
+ },
+ {
+  "id": "chat-all-states",
+  "title": "S10 · Чат: все типы сообщений и ошибок",
+  "group": "Чат",
+  "file": "screens/chat-all-states.html",
+  "route": "chat"
+ },
+ {
+  "id": "chat-feedback",
+  "title": "S10 · Чат: отзыв «Неполезно»",
+  "group": "Чат",
+  "file": "screens/chat-feedback.html",
+  "route": "chat"
+ }
+]
