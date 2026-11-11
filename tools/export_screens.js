@@ -72,11 +72,29 @@ window.__exportScreens=async function(o={}){
   const URL=o.url||'http://127.0.0.1:8767/save';
   const appCss=$$('style').map(s=>s.textContent).find(t=>t.includes('/* Прототип:'));
   const fonts=$('link[href*="fonts.googleapis"]').outerHTML;
-  P().device('m',false,true);await wait(100);
   const index=[];
-  for(const [id,title,group,prep] of LIST){
-    await prep();await wait(60);
+  /* размер и режим: основной эталон 390 × 844; для ключевых экранов ещё маленький телефон, горизонтальное положение и открытая клавиатура */
+  const frame=$('#frame'),app=$('#app');
+  const SIZES={
+    base:{label:'390 × 844',set:()=>P().device('m',false,true)},
+    '320x568':{label:'маленький телефон 320 × 568',set:()=>P().device('s',false,true)},
+    '667x375':{label:'горизонтально 667 × 375',set:()=>{P().device('m',false,false);frame.style.setProperty('--fw','667px');frame.style.setProperty('--fh','375px')}},
+    kb:{label:'390 × 844, открыта клавиатура',set:()=>P().device('m',true,true)},
+  };
+  const VARIANTS=[['home-b',['320x568','667x375']],['s4-filled',['320x568','667x375','kb']],['s7-intro-form',['320x568','667x375','kb']],
+    ['s7-section-4-intro',['320x568','667x375']],['s7-question-long-x',['320x568','667x375']],['s7-free-answer-filled',['320x568','kb']],
+    ['s7-break-8',['320x568','667x375']],['chat-all-states',['320x568','667x375','kb']],['s2-login',['320x568','kb']]];
+  const jobs=[];
+  for(const e of LIST)jobs.push([e,'base']);
+  for(const [id,vs] of VARIANTS){const e=LIST.find(x=>x[0]===id);vs.forEach(v=>jobs.push([e,v]))}
+  for(const [[id0,title0,group,prep],v] of jobs){
+    SIZES[v].set();await wait(60);
+    await prep();await wait(80);
+    const id=v==='base'?id0:`${id0}--${v}`,title=v==='base'?title0:`${title0} · ${SIZES[v].label}`;
     const board=$('#board').textContent;
+    const fv=['--fw','--fh','--kh'].map(k=>`${k}:${frame.style.getPropertyValue(k)}`).join(';');
+    const av=['--sat','--sab'].map(k=>`${k}:${app.style.getPropertyValue(k)||'0px'}`).join(';');
+    const kb=frame.classList.contains('kbsim');
     const html=`<!doctype html>
 <html lang="ru">
 <head>
@@ -92,15 +110,18 @@ ${appCss}</style>
 ${board}</style>
 </head>
 <body>
-<div id="stage"><div id="frame" style="--fw:390px;--fh:844px;--kh:291px"><div id="app" style="--sat:47px;--sab:34px">
+<!-- Рамка телефона и значения --sat/--sab ниже — только имитация устройства для эталона (${esc(SIZES[v].label)}).
+     В продукте их не переносить: отступы берутся из env(safe-area-inset-*), см. :root в app.css.${kb?'\n     Блок #kbd — место, которое занимает экранная клавиатура; в продукте его нет, режим .kb включается по факту уменьшения видимой области (функция viewport в app.js).':''} -->
+<div id="stage"><div id="frame"${kb?' class="kbsim"':''} style="${fv}"><div id="app"${kb?' class="kb"':''} style="${av}">
 ${snapshot()}
-</div></div></div>
+</div>${kb?'<div id="kbd">Клавиатура</div>':''}</div></div>
 </body>
 </html>
 `;
     await fetch(URL+'?name='+id+'.html',{method:'POST',mode:'no-cors',body:html});
-    index.push({id,title,group,file:`screens/${id}.html`,route:P().cur()});
+    index.push({id,title,group,size:SIZES[v].label,file:`screens/${id}.html`,route:P().cur()});
   }
+  SIZES.base.set();
   await fetch(URL+'?name=index.json',{method:'POST',mode:'no-cors',body:JSON.stringify(index,null,1)});
   return index.length;
 };
