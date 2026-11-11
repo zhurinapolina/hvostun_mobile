@@ -389,19 +389,19 @@ form.mn>.fl:has(.cal):not(:first-child),form.mn>fieldset:nth-of-type(n+3):last-o
 /* заголовок перебивки: строки не наезжают (Й, цифры) */
 .sup .sec-t{line-height:1.12}
 
-/* перебивка в стиле главного экрана S1 (11.11): синий фон с зерном, голубой заголовок, кремовая собака, лаймовая кнопка */
+/* перебивка в стиле главного экрана S1: синий фон с зерном, голубой заголовок, кремовая собака, лаймовая кнопка */
 .ph.g{background:#3352a3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.16 0 0 0 0 0.1 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .ph.g .sup .sec-t{color:#a9d8f5}
 .ph.g .sup .tx{color:#fbf6ec}
 .ph.g .sup .nx-s{color:#ffffff}
 .ph.g .ft .b1{background:#e3f4a2;color:#24397a;box-shadow:0 10px 20px -10px rgba(15,25,60,.6)}
 
-/* вступление раздела: длинный текст прокручивается, внизу затухание — видно, что есть продолжение (11.11) */
+/* вступление раздела: длинный текст прокручивается, внизу затухание — видно, что есть продолжение */
 .mn.anq:has(.sec-tx){overflow-y:auto;padding-bottom:28px;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent)}
 /* название раздела в 2–3 строки: строки не наезжают */
 .mn.anq .sec-t{line-height:1.1}
 
-/* ползунок прокрутки: экран не помещается — справа тонкая полоска, как в iOS; длина = видимая доля (11.11) */
+/* ползунок прокрутки: экран не помещается — справа тонкая полоска, как в iOS; длина = видимая доля */
 .mn.anq,.mn.vv{overflow-y:auto;scrollbar-width:none}
 .mn.anq::-webkit-scrollbar,.mn.vv::-webkit-scrollbar{display:none}
 .ph>.sb{position:absolute;right:4px;width:3px;border-radius:2px;background:rgba(27,36,64,.32);z-index:2;pointer-events:none}
