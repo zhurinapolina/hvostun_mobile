@@ -1,0 +1,67 @@
+{
+ "_comment": "GET /me в каждом состоянии главной. Ключ — состояние главной из docs/handoff.md, раздел 2.",
+ "A": {
+  "profile_status": "none",
+  "survey_status": "none",
+  "survey_position": null,
+  "portrait_status": "none",
+  "plan_status": "none",
+  "dog_name": null
+ },
+ "A2": {
+  "profile_status": "partial",
+  "survey_status": "none",
+  "survey_position": null,
+  "portrait_status": "none",
+  "plan_status": "none",
+  "dog_name": "Джесси"
+ },
+ "B": {
+  "profile_status": "done",
+  "survey_status": "none",
+  "survey_position": null,
+  "portrait_status": "none",
+  "plan_status": "none",
+  "dog_name": "Джесси"
+ },
+ "C": {
+  "profile_status": "done",
+  "survey_status": "started",
+  "survey_position": "q:12",
+  "portrait_status": "none",
+  "plan_status": "none",
+  "dog_name": "Джесси"
+ },
+ "D, портрет собирается": {
+  "profile_status": "done",
+  "survey_status": "done",
+  "survey_position": null,
+  "portrait_status": "building",
+  "plan_status": "none",
+  "dog_name": "Джесси"
+ },
+ "D, портрет не собрался": {
+  "profile_status": "done",
+  "survey_status": "done",
+  "survey_position": null,
+  "portrait_status": "failed",
+  "plan_status": "none",
+  "dog_name": "Джесси"
+ },
+ "E": {
+  "profile_status": "done",
+  "survey_status": "done",
+  "survey_position": null,
+  "portrait_status": "ready",
+  "plan_status": "active",
+  "dog_name": "Джесси"
+ },
+ "F": {
+  "profile_status": "done",
+  "survey_status": "done",
+  "survey_position": null,
+  "portrait_status": "ready",
+  "plan_status": "done",
+  "dog_name": "Джесси"
+ }
+}

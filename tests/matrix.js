@@ -12,8 +12,8 @@ const nm=e=>{const c=String(e.className?.baseVal??e.className??'').split(' ')[0]
 const LONG='Барбарисочка Лапушка Длинноим';
 const LONGMSG='Собака '+'очень'.repeat(40)+' долго не спит ночью, когда остаётся одна, и скулит под дверью уже вторую неделю подряд';
 const P=()=>window.__p;
-const filled=()=>({name:'Васёк',age:'старше 7 лет',sex:'мальчик',date:'07.07.2026',from:'из приюта',first:'нет, раньше были собаки'});
-function base(o){const s={profile:'none',survey:'none',draft:{},pos:'aq:vv',ans:{},vv:{},free:{},chat:[],greeted:false};return Object.assign(s,o)}
+const filled=()=>({name:'Джесси',age:'6–12 месяцев',sex:'девочка',date:'05.11.2026',from:'из приюта',first:'нет, раньше были собаки'});
+function base(o){const s={profile:'none',survey:'none',draft:{},pos:'aq:vv',ans:{},vv:{},free:{},chat:[],greeted:false,plan:P().newPlan(),recI:null,recFrom:'plan'};const{plan,...r}=o||{};Object.assign(s,r);if(plan)s.plan=P().mkPlan(plan);if(s.survey==='done')s.vv={t0:'3',f0:'нет',f1:'да',f2:'~ 1 год',f3:'метис',t1:'25',t2:'52',f4:'нет'};return s}
 async function show(r,st){P().st=st;P().go(r,{back:true,keep:true});await wait(60)}
 const GREET='Привет! Я ИИ-помощник по вопросам ухода за питомцем. Помогу разобраться в вашем вопросе. <br>Что вас интересует?';
 const ANS='[Текст ответа ассистента по материалам книг: пояснение и шаги]';
@@ -31,15 +31,12 @@ const STATES=[
  ['A2',0,()=>show('s3',base({profile:'partial',draft:{name:'Васёк'}}))],
  ['B длинная кличка',0,()=>show('s3',base({profile:'done',draft:{...filled(),name:LONG}}))],
  ['C',0,()=>show('s3',base({profile:'done',survey:'started',draft:filled()}))],
- ['D',0,()=>show('s3',base({profile:'done',survey:'done',draft:filled()}))],
  ['S4 пустая',1,()=>show('s4',base())],
  ['S4 все ошибки',1,async()=>{await show('s4',base());$('#app form .b1.w').click();await wait(30)}],
  ['S4 дата в будущем',1,async()=>{await show('s4',base({draft:{...filled(),date:'01.01.2031'}}));$('#app form .b1.w').click();await wait(30)}],
  ['S4 календарь',0,async()=>{await show('s4',base({draft:filled()}));$('#app .iw').click();await wait(60)}],
  ['S4 заполнено',1,()=>show('s4',base({draft:{...filled(),name:LONG,from:'от прежних хозяев',first:'нет, сейчас в доме есть и другие собаки'}}))],
  ['S4 сохранение',1,async()=>{await show('s4',base({draft:filled()}));$('#app form .b1.w').click();await wait(30)}],
- ['S4b первый',0,()=>show('s4b',base({profile:'done',draft:{...filled(),name:LONG,from:'от прежних хозяев',first:'нет, сейчас в доме есть и другие собаки'}}))],
- ['S4b повторный',0,()=>show('s4b',base({profile:'done',survey:'started',draft:filled()}))],
  ['S5',0,()=>show('s5',base({profile:'done',draft:filled()}))],
  ['Введение',1,()=>show('aq:vv',base({profile:'done',survey:'started',draft:filled()}))],
  ['Введение ошибки',1,async()=>{await show('aq:vv',base({profile:'done',survey:'started',draft:filled()}));$('#app .ft .b1').click();await wait(30)}],
@@ -50,7 +47,31 @@ const STATES=[
  ['Длинный вопрос, X',0,()=>show('aq:q:16',base({profile:'done',survey:'started',draft:filled(),ans:{16:'X'}}))],
  ['Свободный ответ',1,async()=>{await show('aq:fr:8',base({profile:'done',survey:'started',draft:filled(),free:{8:LONGMSG}}))}],
  ['Перебивка 8',0,()=>show('aq:pb:8',base({profile:'done',survey:'started',draft:filled()}))],
- ['S9',0,()=>show('s9',base({profile:'done',survey:'done',draft:filled()}))],
+ ['D портрет не собран',0,()=>show('s3',base({profile:'done',survey:'done',draft:filled()}))],
+ ['E шаг в работе',0,()=>show('s3',base({profile:'done',survey:'done',draft:filled(),plan:'work'}))],
+ ['E длинная кличка',0,()=>show('s3',base({profile:'done',survey:'done',draft:{...filled(),name:LONG},plan:'mid'}))],
+ ['F маршрут пройден',0,()=>show('s3',base({profile:'done',survey:'done',draft:filled(),plan:'done'}))],
+ ['Профиль до анкеты',0,()=>show('s4b',base({profile:'done',draft:{...filled(),name:LONG,first:'нет, сейчас в доме есть и другие собаки'}}))],
+ ['Профиль с портретом',0,()=>show('s4b',base({profile:'done',survey:'done',draft:filled(),plan:'new'}))],
+ ['S8 ожидание',0,()=>show('s8',base({profile:'done',survey:'done',draft:filled()}))],
+ ['S8 ошибка',0,async()=>{P().st=base({profile:'done',survey:'done',draft:filled()});P().go('s8',{back:true,err:1,keep:true});await wait(60)}],
+ ['S8 готово',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'new'});await show('s8',s)}],
+ ['План начало',0,()=>show('pl',base({profile:'done',survey:'done',draft:filled(),plan:'new'}))],
+ ['План лимит',0,()=>show('pl',base({profile:'done',survey:'done',draft:filled(),plan:'limit'}))],
+ ['План вернули',0,()=>show('pl',base({profile:'done',survey:'done',draft:filled(),plan:'ret'}))],
+ ['План пройден',0,()=>show('pl',base({profile:'done',survey:'done',draft:filled(),plan:'done'}))],
+ ['Рекомендация новая',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'new'});s.recI=0;await show('rec',s)}],
+ ['Рекомендация лимит',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'limit'});s.recI=2;await show('rec',s)}],
+ ['Рекомендация в работе, все группы',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'work'});s.recI=0;s.plan.recs[0].open={0:true,1:true,2:true,3:true};await show('rec',s)}],
+ ['Рекомендация всё отмечено',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'work'});s.recI=0;for(let g=0;g<4;g++)for(let k=0;k<9;k++)s.plan.recs[0].ck[g+'.'+k]=1;['0.5','0.6','0.7','0.8','1.4','1.5','1.6','1.7','1.8','3.2','3.3','3.4','3.5','3.6','3.7','3.8'].forEach(k=>delete s.plan.recs[0].ck[k]);await show('rec',s)}],
+ ['Рекомендация возвращённая',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'ret'});s.recI=0;await show('rec',s)}],
+ ['Рекомендация отложена, занята',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'mid'});s.recI=1;await show('rec',s)}],
+ ['Рекомендация помогла',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'mid'});s.recI=0;await show('rec',s)}],
+ ['Шторка результата',1,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'work'});s.recI=0;await show('rec',s);$('#app [data-a=result]').click();await wait(350)}],
+ ['Шторка: не подошла, критерии, комментарий',1,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'work'});s.recI=0;await show('rec',s);$('#app [data-a=result]').click();await wait(350);$('#app .r-acc .hh').click();$('#app .r-rc[data-s=notfit]').click();const ta=$('#app #rs-cm');ta.value=LONGMSG.slice(0,300);ta.dispatchEvent(new Event('input',{bubbles:true}));await wait(40)}],
+ ['Шторка: лимит',1,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'limit'});s.recI=2;s.plan.recs[2].s='work';await show('rec',s);$('#app [data-a=result]').click();await wait(350)}],
+ ['Подтверждение',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'work'});s.recI=0;await show('rec',s);$('#app [data-a=result]').click();await wait(350);$('#app .r-rc[data-s=notfit]').click();const ta=$('#app #rs-cm');ta.value='не подошло';ta.dispatchEvent(new Event('input',{bubbles:true}));$('#app [data-a=save]').click();await wait(1100)}],
+ ['S14',0,async()=>{await show('s14',base({profile:'done',survey:'done',draft:filled(),plan:'done'}));await wait(900)}],
  ['Чат пустой',1,()=>show('chat',base({profile:'done',draft:filled()}))],
  ['Чат все сообщения',1,async()=>{await show('chat',base({profile:'done',draft:filled(),greeted:true,chat:chatAll()}));
    const ta=$('#app .ta');ta.value=LONGMSG;ta.dispatchEvent(new Event('input'));await wait(30)}],
@@ -72,11 +93,11 @@ function textRects(root){ // строки текста как отдельные
     const R=document.createRange();R.selectNodeContents(n);for(const r of R.getClientRects())if(r.width>1&&r.height>1)out.push({el,r,kind:'t',txt:n.textContent.trim().slice(0,22)})}
   return out;
 }
-function inOverlay(e){return e.closest('#app .bs,#app .dp,#app .ov')}
+function inOverlay(e){return e.closest('#app .bs,#app .dp,#app .ov,#app .r-bs,#app .r-ov')}
 function issues(){
   const A=app(),a=A.getBoundingClientRect(),bad=[];
-  const overlay=$('#app .bs,#app .dp');
-  const ctrls=$$('#app [data-r],#app a,#app button,#app input:not([type=radio]):not([type=checkbox]),#app textarea,#app label.cx,#app .s11 button').filter(e=>vis(e)&&anc(e)&&!e.closest('svg'));
+  const overlay=$('#app .bs,#app .dp,#app .r-bs');
+  const ctrls=$$('#app [data-r],#app a,#app button,#app input:not([type=radio]):not([type=checkbox]),#app textarea,#app label.cx,#app .s11 button,#app .r-it,#app .r-gh,#app .r-rc:not(.dis),#app [data-rec],#app [data-a]').filter(e=>vis(e)&&anc(e)&&!e.closest('svg'));
   // 1. каждую кнопку можно увидеть и нажать
   for(const e of ctrls){
     if(overlay&&!inOverlay(e))continue; // под открытым листом или календарём — так задумано
@@ -124,6 +145,7 @@ window.__issues=issues;window.__states=STATES;
 window.__matrix=async function(o={}){
   const A=app(),sizes=o.sizes||[[360,640]],res={};
   const old=A.getAttribute('style')||'';
+  const na=document.createElement('style');na.textContent='#app *,#app *::before,#app *::after{animation:none!important;transition:none!important}';document.head.append(na);
   for(const [W,H] of sizes){
     for(const [name,hasInput,prep] of STATES){
       if(o.only&&!name.includes(o.only))continue;
@@ -139,7 +161,7 @@ window.__matrix=async function(o={}){
       }
     }
   }
-  A.setAttribute('style',old);A.classList.remove('kb');
+  A.setAttribute('style',old);A.classList.remove('kb');na.remove();
   return res;
 };
 })();1

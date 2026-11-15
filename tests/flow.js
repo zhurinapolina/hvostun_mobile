@@ -1,65 +1,89 @@
-/* Сценарий всего пути: вход → профиль → анкета (Введение, 7 разделов, перебивки) → план → меню → чат.
-   window.__flow() возвращает журнал шагов; строки «!!» и «EXC» — ошибки. */
+/* Сквозной сценарий полного пути: вход → профиль → анкета → портрет → все рекомендации → маршрут пройден.
+   window.__flow() возвращает журнал; строки «!!» и «EXC» — ошибки. */
 window.__flow=async function(){
   const wait=ms=>new Promise(r=>setTimeout(r,ms)),P=window.__p,log=[];
   const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
   const txt=t=>$$('#app a,#app button').find(e=>e.textContent.trim().startsWith(t)&&e.offsetParent);
   const click=async(t,ms=60)=>{const e=typeof t==='string'?txt(t):t;if(!e){log.push('!! нет кнопки '+t);return}e.click();await wait(ms)};
-  const card=t=>$$('#app .cd,#app .wg a').find(c=>c.textContent.includes(t));
   const setv=(e,v)=>{e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}))};
   const nav=()=>$$('#app .nv a').map(a=>a.textContent.trim()[0]+(a.classList.contains('on')?'*':a.classList.contains('off')?'-':'')).join(' ');
-  const s=m=>log.push(m+' → '+P.cur()+' ['+nav()+']');
-  const expect=(ok,m)=>log.push((ok?'ok ':'!! ')+m);
+  const ok=(c,m)=>log.push((c?'ok ':'!! ')+m);
+  const all=()=>$('#app').textContent;
+  const noFuture=m=>ok(!/шаг \d+ из \d+/i.test(all())&&!/из 5\b/.test(all()),m+': нет номера шага и общего числа шагов');
+  const result=async(sel,cm)=>{await click($('#app [data-a=result]')||$('#app [data-a=nofit]'),380);
+    const c=$(`#app .r-rc[data-s=${sel}]`);if(c.classList.contains('dis'))return false;c.click();await wait(30);
+    if(cm)setv($('#app #rs-cm'),cm);await click($('#app [data-a=save]'),900);return true};
   try{
-  P.preset(0);await wait(30);s('старт');
-  await click('Войти');s('S1 войти');
-  const login=$$('#app input').filter(i=>i.type!=='checkbox');
-  setv(login[0],'ошибка');setv(login[1],'123');$('#app input[type=checkbox]').click();await wait(30);
-  await click('Войти',1000);expect(!!$('#app .eslot').textContent.trim(),'логин «ошибка» показывает E2');
-  const l2=$$('#app input').filter(i=>i.type!=='checkbox');setv(l2[0],'polina');setv(l2[1],'123');
-  const c2=$('#app input[type=checkbox]');if(!c2.checked)c2.click();await wait(30);
-  await click('Войти',1000);s('логин ок');
-  expect($('#app .nx')&&$('#app .nx').tagName!=='A'&&!$('#app .nx [data-r]'),'«Следующий шаг» — подсказка, не нажимается');
-  await click(card('Профиль питомца'));s('карточка профиля');
-  setv($('#app form input[type=text],#app form input:not([type])'),'Васёк');
-  await click($('#app .hd .ic,#app .hd button,#app .hd a'));s('назад из S4');
-  expect(P.cur()==='s3'&&/Продолжить заполнение/.test($('#app .nx').textContent),'A2: продолжить заполнение');
-  await click(card('Профиль питомца'));expect($('#app form input').value==='Васёк','кличка сохранена');
-  await click('Готово',50);expect($$('#app .miss').length>0,'ошибки пустых полей');
+  P.preset(0);await wait(30);
+  await click('Войти');const lg=$$('#app input').filter(i=>i.type!=='checkbox');setv(lg[0],'polina');setv(lg[1],'123');$('#app input[type=checkbox]').click();await wait(30);
+  await click('Войти',1000);ok(P.cur()==='s3'&&/Привет/.test(all()),'вход → главная A ['+nav()+']');
+  ok(!!$('#app .r-sc.lk'),'A: план и чат закрыты плитками');
+  await click('Заполнить профиль');ok(P.cur()==='s4','карточка шага → форма профиля');
+  setv($('#app form input[type=text],#app form input:not([type])'),'Джесси');
   const pick=async v=>{const l=$$('#app form label').find(e=>e.textContent.trim()===v);if(!l)log.push('!! нет '+v);else{l.click();await wait(15)}};
-  await pick('старше 7 лет');await pick('мальчик');
-  const d=$$('#app form input').filter(i=>!['radio','checkbox'].includes(i.type))[1];
-  d.click();await wait(30);$('#app .dp-n').click();await wait(30);$$('#app .dp-d:not([disabled])')[6].click();await wait(30);
+  await pick('6–12 месяцев');await pick('девочка');
+  const d=$$('#app form input').filter(i=>!['radio','checkbox'].includes(i.type))[1];d.click();await wait(30);$('#app .dp-n').click();await wait(30);$$('#app .dp-d:not([disabled])')[4].click();await wait(30);
   await pick('из приюта');await pick('нет, раньше были собаки');
-  await click('Готово',1200);s('профиль готов');
-  await click(card('План адаптации'));s('B → S5');
-  await click('Заполнить анкету');s('анкета');
-  expect(P.cur()==='aq:vv'&&$$('#app legend').some(l=>/в приюте/.test(l.textContent)),'Введение: вопрос о сроке в приюте есть (из приюта)');
-  await click('Далее');expect($$('#app .miss').length===2,'Введение: 2 обязательных поля');
-  setv($('#app form input.in'),'2');await click($$('#app form label.cx').find(l=>l.textContent.trim()==='метис'),20);
-  await click('Далее');expect(P.cur()==='aq:pb:1','перебивка 1');
-  await click($('#app .hd [data-r]'));expect(P.cur()==='s3'&&/Раздел 2 из 8/.test(card('План адаптации').textContent),'× с перебивки → главная C, «Раздел 2 из 8»');
-  await click(card('План адаптации'));expect(P.cur()==='aq:pb:1','продолжение с того же места');
-  let n=0,guard=0;
-  while(P.cur()!=='s9'&&guard++<200){
-    const c=P.cur();
-    if(c.startsWith('aq:q:')){const req=txt('Далее').disabled;n++;
-      if(c==='aq:q:1')expect(req,'вопрос 1: «Далее» неактивна до ответа');
-      if(c==='aq:q:27')expect(!req,'Дрессируемость: «Далее» активна без ответа');
-      $$('#app .op')[c==='aq:q:16'?5:2].click();await wait(10)}
-    if(c==='aq:fr:3')setv($('#app textarea'),'лает на курьеров');
-    if(c==='aq:pb:8'){expect(/Сформировать профиль/.test($('#app .ft .b1').textContent),'последняя перебивка: «Сформировать профиль»')}
-    await click($('#app .ft .b1'),15);
-  }
-  expect(n===42,'пройдено вопросов: '+n);s('конец анкеты');
-  expect(P.st.ans[16]==='X'&&P.st.free[3]==='лает на курьеров','ответы и свободный текст сохранены');
-  $$('#app .nv a')[0].click();await wait(40);expect(!$('#app .nx'),'главная D без «Следующего шага»');s('меню главная');
-  $$('#app .nv a')[1].click();await wait(40);s('меню профиль');
-  $$('#app .nv a')[2].click();await wait(40);s('меню план');
-  $$('#app .nv a')[3].click();await wait(40);s('меню чат');
-  const ta=$('#app .ta'),sn=$('#app .sn');
-  const ask=async(q,ms)=>{setv(ta,q);sn.click();await wait(ms);log.push('чат «'+q+'» → '+$$('#app .ms>*').slice(-1)[0].textContent.trim().slice(0,60))};
-  await ask('как отучить от лая',1800);await ask('кот',1800);await ask('укус',1800);await ask('сбой',300);
+  await click('Готово',1200);ok(P.cur()==='s3'&&/Получить план/.test(all())&&/Джесси/i.test($('#app .r-day').textContent),'главная B с кличкой ['+nav()+']');
+  await click($$('#app .nv a')[1]);ok(P.cur()==='s4b'&&!/Портрет/.test(all())&&/Первая собака/.test(all()),'профиль до анкеты: данные формы, портрета нет');
+  await click($('#app .hd .ic'));await click('Получить план');await click('Заполнить анкету');
+  setv($('#app form input.in'),'3');await click($$('#app form label.cx').find(l=>l.textContent.trim()==='метис'),20);
+  const kg=$$('#app .fl').find(f=>/вес/i.test(f.textContent)).querySelector('input'),cm=$$('#app .fl').find(f=>/рост/i.test(f.textContent)).querySelector('input');setv(kg,'25');setv(cm,'52');
+  await click('Далее');let g=0,n=0;
+  while(!/^s8|^s3/.test(P.cur())&&g++<200){const c=P.cur();if(c.startsWith('aq:q:')){n++;$$('#app .op')[1].click();await wait(8)}
+    if(c==='aq:pb:8')ok(/Собрать портрет/.test($('#app .ft .b1').textContent),'последняя перебивка: «Собрать портрет»');await click($('#app .ft .b1'),12)}
+  ok(n===42&&P.cur()==='s8','анкета 42 вопроса → сборка портрета');
+  await wait(2300);ok(/готов/i.test(all()),'портрет готов');
+  await click('Посмотреть портрет');ok(P.cur()==='s4b'&&/Портрет/.test(all())&&/Рост в холке/.test(all())&&/25 кг/.test(all()),'профиль обогатился: портрет, вес, рост');
+  await click($('#app .hd .ic'));ok(P.cur()==='s3'&&!!$('#app .r-cur [data-r=rec]'),'назад из профиля → главная E ['+nav()+']');noFuture('главная E');
+  await click($$('#app .nv a')[2]);ok(P.cur()==='pl'&&/Неделя 1/.test(all())&&!/Пройденные/.test(all()),'план: первая рекомендация, пройденных нет');noFuture('план');
+  ok($$('#app .r-cur').length===1&&!/Создайте безопасное место/.test(all()),'будущих рекомендаций не видно');
+  // рекомендация 1: в работу, галочки, «Помогла»
+  await click('Посмотреть рекомендацию');ok(P.cur()==='rec'&&/Новая/.test($('#rc-chip').textContent),'рекомендация 1 «Новая»');
+  $$('#app .r-it')[0].click();await wait(20);ok(/Отмечено 0 из 20/.test(all())&&!$('#app .r-it.on')&&/Проверьте/.test($('#app .r-it').textContent+all()),'в «Новой» пункты видны, но не отмечаются');
+  await click('Беру в работу');ok(/В работе/.test($('#rc-chip').textContent)&&!!$('#app [data-a=result]'),'взяли в работу');
+  $$('#app .r-it')[0].click();$$('#app .r-it')[1].click();$$('#app .r-it')[0].click();await wait(20);ok(/Отмечено 1 из 20/.test(all()),'в работе отметки ставятся и снимаются');
+  await click($('#app .hd .ic'));await click('Открыть');ok(/Отмечено 1 из 20/.test(all()),'отметки сохраняются между экранами');
+  ok(await result('helped','Убрали провода'),'результат «Помогла» сохранён');
+  ok(/Открыли следующую рекомендацию/.test(all())&&/Создайте безопасное место/.test($('#app .r-next').textContent),'подтверждение с карточкой следующей');
+  await click('К плану',700);ok(P.cur()==='pl'&&/Пройденные/.test(all())&&/Неделя 2/.test(all()),'план: шаг 2, пройденная в списке');
+  ok($('#app .r-cur').offsetHeight>=$('#app .r-cur').scrollHeight-1&&!!$('#app .r-cur .b1')?.offsetParent,'карточка новой рекомендации показана целиком');
+  ok($$('#app .r-st.work').length===0,'в работе нет ни одной рекомендации');
+  // рекомендация 2: «Не подходит нам»
+  await click('Посмотреть рекомендацию');await click($('#app [data-a=nofit]'),380);
+  ok($('#app .r-rc.on')?.dataset.s==='notfit'&&/Это первая/.test(all()),'«Не подходит нам» → шторка с выбранным «Не подошла» и предупреждением о лимите');
+  setv($('#app #rs-cm'),'нет места');await click($('#app [data-a=save]'),900);ok(/Так бывает/.test(all())&&/передали ваш комментарий/.test(all()),'спокойное подтверждение с комментарием');
+  await click('Открыть',80);ok(P.cur()==='rec'&&/Дозируйте стресс/.test(all()),'«Открыть» → рекомендация 3');
+  // рекомендация 3: вторая «Не подошла» → лимит
+  await click($('#app [data-a=nofit]'),380);ok(/Это вторая/.test(all()),'второй раз: предупреждение «последняя»');await click($('#app [data-a=save]'),900);await click('К плану',80);
+  ok(P.st.plan.used===2&&/Две рекомендации вы уже отложили/.test(all()),'лимит исчерпан: подсказка на карточке плана');
+  ok($$('#app .r-pd.notfit').length===2&&/Можно вернуться/.test(all()),'две отложенные, «Можно вернуться»');
+  await click('Посмотреть рекомендацию');ok(!$('#app [data-a=nofit]')&&/Две рекомендации/.test($('#rc-pn').textContent),'рекомендация 4: ссылки «Не подходит нам» нет');
+  await click('Беру в работу');await click($('#app [data-a=result]'),380);ok($('#app .r-rc[data-s=notfit]').classList.contains('dis'),'в шторке «Не подошла» недоступна');
+  await click($('#app .r-x'),80);ok(!$('#app .r-bs'),'шторка закрывается крестиком');
+  // к отложенной вернуться нельзя, пока текущая в работе
+  await click($('#app .hd .ic'));ok(!/Можно вернуться/.test(all()),'текущая в работе: «Можно вернуться» скрыто');
+  await click($('#app .r-pd.notfit'));ok(!!$('#rc-pn button[disabled]')&&/Сначала отметьте результат/.test(all()),'у отложенной кнопка неактивна');
+  await click($('#app .hd .ic'));await click('Открыть');ok(await result('partial'),'рекомендация 4 «Помогла частично»');await click('К плану',80);
+  // выход 1: вернуться к отложенной
+  await click($('#app .r-pd.notfit'));await click('Попробовать ещё раз');ok(/В работе/.test($('#rc-chip').textContent)&&!!$('#app [data-a=again]'),'вернули отложенную: «В работе», есть «Отложить снова»');
+  await click($('#app .hd .ic'));ok(/Следующая рекомендация ждёт/.test(all())&&$$('#app .r-st.work').length===1,'план: возвращённая в работе, следующая ждёт; в работе одна');
+  await click('Открыть');await click($('#app [data-a=again]'),80);ok(P.cur()==='pl'&&P.st.plan.used===2&&$$('#app .r-pd.notfit').length===2,'«Отложить снова» не тратит лимит');
+  await click($('#app .r-pd.notfit'));await click('Попробовать ещё раз');ok(await result('helped'),'возвращённая «Помогла»');
+  ok(/Возвращаемся к текущей рекомендации/.test(all()),'подтверждение после возвращённой');await click('Открыть',80);
+  // рекомендация 5: последняя → S14
+  ok(/Грызть, рвать/.test(all()),'рекомендация 5');await click('Беру в работу');ok(await result('helped'),'последняя «Помогла»');
+  ok(P.cur()==='s14'&&/Вы прошли/i.test(all()),'маршрут пройден');await wait(900);
+  ok($$('#app .r-sum b').map(b=>b.textContent).join(',')==='3,1,1','сводка 3 · 1 · 1');
+  await click('К плану');ok(/Вы прошли все шаги/i.test(all())&&$$('#app .r-pd').length===5,'план: итог и пять пройденных');
+  // изменить результат у пройденной
+  await click($('#app .r-pd.partial'));await click($('#app [data-a=result]'),380);$('#app .r-rc[data-s=helped]').click();await wait(20);await click($('#app [data-a=save]'),900);
+  ok(!$('#app .r-bs')&&/Помогла$/.test($('#rc-chip').textContent.trim()),'изменили результат: шторка закрылась, чип сменился');
+  await click($('#app .hd .ic'));await click($$('#app .nv a')[0]);ok(/Все шаги пройдены/.test(all()),'главная F ['+nav()+']');
+  // после маршрута вернуться к отложенной
+  await click($('#app [data-r=plan]'));await click($('#app .r-pd.notfit'));await click('Попробовать ещё раз');await click($('#app .hd .ic'));
+  ok($$('#app .r-cur').length===1&&/Вы прошли все шаги/i.test(all()),'маршрут пройден + вернулись к отложенной: карточка в работе и итог');
+  await click($$('#app .nv a')[3]);ok(P.cur()==='chat','чат');
   }catch(e){log.push('EXC '+e.stack.split('\n').slice(0,3).join(' '))}
   return log.join('\n');
 };

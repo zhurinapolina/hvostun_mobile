@@ -1,14 +1,20 @@
 /* Выгрузка эталонных экранов из прототипа.
-   Подключить к prototype/index.html вместе с локальным приёмником (tools/receiver.py) и вызвать в консоли: await __exportScreens()
-   Каждый экран и состояние сохраняется отдельной страницей handoff/screens/<id>.html:
-   точная разметка экрана в том виде, как её показывает прототип, общие правила адаптива (prototype/src/app.css)
-   и только правила доски этого экрана. Плюс handoff/screens/index.json — список экранов. */
+   Запуск: node tools/export_screens.mjs — открывает prototype/index.html в Chrome без окна, подключает этот файл и пишет
+   handoff/screens/<id>.html, handoff/screens/index.json и карту в handoff/README.md.
+   Каждый экран и состояние — отдельная страница: точная разметка экрана в том виде, как её показывает прототип,
+   общие правила адаптива (prototype/src/app.css) и только правила доски этого экрана. */
 (function(){
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const P=()=>window.__p;
-const filled=()=>({name:'Васёк',age:'старше 7 лет',sex:'мальчик',date:'07.07.2026',from:'из приюта',first:'нет, раньше были собаки'});
-const base=o=>Object.assign({profile:'none',survey:'none',draft:{},pos:'aq:vv',ans:{},vv:{},free:{},chat:[],greeted:false},o);
+const filled=()=>({name:'Джесси',age:'6–12 месяцев',sex:'девочка',date:'05.11.2026',from:'из приюта',first:'нет, раньше были собаки'});
+const VV=()=>({t0:'3',f0:'нет',f1:'да',f2:'~ 1 год',f3:'метис',t1:'25',t2:'52',f4:'нет'});
+const base=o=>Object.assign({profile:'none',survey:'none',draft:{},pos:'aq:vv',ans:{},vv:{},free:{},chat:[],greeted:false,plan:P().newPlan(),recI:null,recFrom:'plan'},o);
+/* анкета пройдена; code — состояние маршрута из mkPlan (new, work, mid, limit, ret, last, done) или null, если портрет ещё не собран */
+const pv=(code,x={})=>base({profile:'done',survey:'done',pos:null,draft:filled(),vv:VV(),plan:code?P().mkPlan(code):P().newPlan(),...x});
+const recAt=(code,i,x={})=>()=>show('rec',pv(code,{recI:i,...x}));
+const tap=async(sel,ms=60)=>{const e=typeof sel==='string'?$('#app '+sel):sel;e.click();await wait(ms)};
+const checkAll=async()=>{for(const g of $$('#app .r-gh'))if(g.getAttribute('aria-expanded')!=='true'){g.click();await wait(20)}for(const it of $$('#app .r-it:not(.on)')){it.click();await wait(5)}await wait(40)};
 const show=async(r,st)=>{P().st=st;P().go(r,{back:true,keep:true});await wait(80)};
 const aq=(pos,x={})=>()=>show(pos,base({profile:'done',survey:'started',draft:filled(),...x}));
 const GREET='Привет! Я ИИ-помощник по вопросам ухода за питомцем. Помогу разобраться в вашем вопросе. <br>Что вас интересует?';
@@ -30,15 +36,18 @@ const LIST=[
  ['home-a2','S3 · Главная A2: профиль заполнен частично','Главная',()=>show('s3',base({profile:'partial',draft:{name:'Васёк'}}))],
  ['home-b','S3 · Главная B: профиль готов','Главная',()=>show('s3',base({profile:'done',draft:filled()}))],
  ['home-c','S3 · Главная C: анкета в процессе','Главная',()=>show('s3',base({profile:'done',survey:'started',pos:'aq:q:12',draft:filled()}))],
- ['home-d','S3 · Главная D: анкета пройдена','Главная',()=>show('s3',base({profile:'done',survey:'done',pos:null,draft:filled()}))],
+ ['home-d','S3 · Главная D: анкета пройдена, портрет не собран','Главная',()=>show('s3',pv(null))],
+ ['home-e-new','S3 · Главная E: выдана новая рекомендация','Главная',()=>show('s3',pv('new'))],
+ ['home-e','S3 · Главная E: рекомендация в работе','Главная',()=>show('s3',pv('work'))],
+ ['home-f','S3 · Главная F: маршрут пройден','Главная',()=>show('s3',pv('done'))],
  ['s4-empty','S4 · Профиль: пустая форма','Профиль',()=>show('s4',base())],
  ['s4-errors','S4 · Профиль: все поля не заполнены','Профиль',async()=>{await show('s4',base());await click('#app form .b1.w')}],
  ['s4-date-future','S4 · Профиль: дата в будущем','Профиль',async()=>{await show('s4',base({draft:{...filled(),date:'01.01.2031'}}));await click('#app form .b1.w')}],
  ['s4-calendar','S4 · Профиль: выбор даты','Профиль',async()=>{await show('s4',base({draft:filled()}));await click('#app .iw',80)}],
  ['s4-filled','S4 · Профиль: заполнено','Профиль',()=>show('s4',base({draft:filled()}))],
  ['s4-saving','S4 · Профиль: сохранение','Профиль',async()=>{await show('s4',base({draft:filled()}));await click('#app form .b1.w')}],
- ['s4b-first','S4b · Вкладка «Профиль», первый заход','Профиль',()=>show('s4b',base({profile:'done',draft:filled()}))],
- ['s4b-repeat','S4b · Вкладка «Профиль», повторный заход','Профиль',()=>show('s4b',base({profile:'done',survey:'started',draft:filled()}))],
+ ['s4b-profile','S4b · Профиль: форма заполнена, анкеты ещё нет','Профиль',()=>show('s4b',base({profile:'done',draft:filled()}))],
+ ['s4b-portrait','S4b · Профиль после анкеты: данные анкеты и портрет','Профиль',async()=>{await show('s4b',pv('new'));const e=$$('#app .r-sub').find(x=>/по анкете от/.test(x.textContent));if(e)e.textContent='Портрет составлен по анкете от 14.11.2026'}],
  ['s5-survey-start','S5 · Анкета: вход','Анкета',()=>show('s5',base({profile:'done',draft:filled()}))],
  ['s7-intro-form','S7 · Раздел 1 «Введение»: форма (собака из приюта)','Анкета',aq('aq:vv')],
  ['s7-intro-form-not-shelter','S7 · «Введение»: собака не из приюта — без вопроса о сроке в приюте','Анкета',aq('aq:vv',{draft:{...filled(),from:'от заводчика'}})],
@@ -53,7 +62,38 @@ const LIST=[
  ['s7-question-optional','S7 · Необязательный вопрос («Дрессируемость»): «Далее» активна','Анкета',aq('aq:q:27')],
  ['s7-free-answer','S7 · Свободный ответ в конце раздела','Анкета',aq('aq:fr:2')],
  ['s7-free-answer-filled','S7 · Свободный ответ: заполнено','Анкета',aq('aq:fr:3',{free:{3:'Лает на курьеров и на звонок в дверь, успокаивается за пару минут.'}})],
- ['s9-plan-stub','S9 · План: заглушка «Сервис в разработке»','План',()=>show('s9',base({profile:'done',survey:'done',pos:null,draft:filled()}))],
+ ['s8-building','S8 · Портрет собирается','Портрет',()=>show('s8',pv(null))],
+ ['s8-ready','S8 · Портрет готов','Портрет',()=>show('s8',pv('new'))],
+ ['s8-error','S8 · Портрет не собрался','Портрет',async()=>{P().st=pv(null);P().go('s8',{back:true,err:1,keep:true});await wait(80)}],
+ ['s9-plan-new','S9 · План: выдана первая рекомендация','План',()=>show('pl',pv('new'))],
+ ['s9-plan-work','S9 · План: рекомендация в работе','План',()=>show('pl',pv('work'))],
+ ['s9-plan-mid','S9 · План: середина маршрута, есть пройденные и отложенная','План',()=>show('pl',pv('mid'))],
+ ['s9-plan-limit','S9 · План: обе отложенные использованы, подсказка о лимите','План',()=>show('pl',pv('limit'))],
+ ['s9-plan-returned','S9 · План: вернули отложенную, следующая ждёт','План',()=>show('pl',pv('ret'))],
+ ['s9-plan-done','S9 · План: маршрут пройден','План',()=>show('pl',pv('done'))],
+ ['s9-plan-done-returned','S9 · План: маршрут пройден, вернулись к отложенной','План',()=>{const s=pv('done');s.plan.recs[1].s='work';s.plan.recs[1].ret=true;return show('pl',s)}],
+ ['s12-rec-new','S12 · Рекомендация «Новая»: пункты видны, отметить нельзя','Рекомендация',recAt('new',0)],
+ ['s12-rec-new-limit','S12 · «Новая», лимит «Не подошла» исчерпан','Рекомендация',recAt('limit',2)],
+ ['s12-rec-work','S12 · Рекомендация «В работе»: часть пунктов отмечена','Рекомендация',recAt('work',0)],
+ ['s12-rec-work-why-open','S12 · «В работе»: «Почему это важно» раскрыто','Рекомендация',async()=>{await recAt('work',0)();await tap('[data-a=more]')}],
+ ['s12-rec-work-all-checked','S12 · «В работе»: всё отмечено','Рекомендация',async()=>{await recAt('work',0)();await checkAll()}],
+ ['s12-rec-helped','S12 · Пройденная: «Помогла», результат можно изменить','Рекомендация',recAt('mid',0)],
+ ['s12-rec-partial','S12 · Пройденная: «Помогла частично»','Рекомендация',recAt('last',3)],
+ ['s12-rec-notfit','S12 · Отложенная: можно вернуть','Рекомендация',recAt('limit',0)],
+ ['s12-rec-notfit-blocked','S12 · Отложенная: вернуть нельзя, пока текущая в работе','Рекомендация',recAt('mid',1)],
+ ['s12-rec-returned','S12 · Возвращённая в работу: «Отложить снова»','Рекомендация',recAt('ret',0)],
+ ['s12-rec-last','S12 · Последняя рекомендация маршрута','Рекомендация',recAt('last',4)],
+ ['s13-result','S13 · Результат: ничего не выбрано, «Сохранить» неактивна','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]')}],
+ ['s13-result-helped','S13 · Результат: выбрано «Помогла», критерии раскрыты','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]');await tap('.r-bs .hh');await tap('.r-rc[data-s=helped]')}],
+ ['s13-result-notfit','S13 · Результат: «Не подошла», первая отложенная','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]');await tap('.r-rc[data-s=notfit]')}],
+ ['s13-result-notfit-second','S13 · Результат: «Не подошла», вторая отложенная','Результат',async()=>{await recAt('mid',2)();await tap('[data-a=result]');await tap('.r-rc[data-s=notfit]')}],
+ ['s13-result-limit','S13 · Результат: «Не подошла» недоступна','Результат',async()=>{await recAt('limit',2)();await tap('[data-a=take]');await tap('[data-a=result]')}],
+ ['s13-result-saving','S13 · Результат: сохранение','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]');await tap('.r-rc[data-s=partial]');await tap('[data-a=save]',40)}],
+ ['s13-result-edit','S13 · Изменение результата у пройденной','Результат',async()=>{await recAt('mid',0)();await tap('[data-a=result]')}],
+ ['s13-confirm-next','S13 · Подтверждение: открыта следующая рекомендация','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]');await tap('.r-rc[data-s=helped]');await tap('[data-a=save]',900)}],
+ ['s13-confirm-notfit','S13 · Подтверждение после «Не подошла» с комментарием','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]');await tap('.r-rc[data-s=notfit]');const t=$('#app #rs-cm');setv(t,'Собака не подходит к лежанке');await tap('[data-a=save]',900)}],
+ ['s13-confirm-back','S13 · Подтверждение: возвращаемся к текущей рекомендации','Результат',async()=>{await recAt('ret',0)();await tap('[data-a=result]');await tap('.r-rc[data-s=helped]');await tap('[data-a=save]',900)}],
+ ['s14-final','S14 · Маршрут пройден','Результат',async()=>{await show('s14',pv('done'));await wait(1100)}],
  ['chat-empty','S10 · Чат: первое открытие','Чат',()=>show('chat',base({profile:'done',draft:filled()}))],
  ['chat-all-states','S10 · Чат: все типы сообщений и ошибок','Чат',async()=>{await show('chat',base({profile:'done',draft:filled(),greeted:true,chat:chatAll()}))}],
  ['chat-feedback','S10 · Чат: отзыв «Неполезно»','Чат',async()=>{await show('chat',base({profile:'done',draft:filled(),greeted:true,chat:chatAll().slice(0,3).map((m,i)=>i===2?{...m,v:null}:m)}));await click('#app [data-c=down]')}],
@@ -64,12 +104,14 @@ function snapshot(){
   const a=$$('input,textarea',live),b=$$('input,textarea',ph);
   a.forEach((el,i)=>{const c=b[i];if(el.type==='checkbox'||el.type==='radio'){el.checked?c.setAttribute('checked',''):c.removeAttribute('checked')}
     else if(el.tagName==='TEXTAREA')c.textContent=el.value;else c.setAttribute('value',el.value)});
-  $$('[data-r],[data-c],[data-x],[data-i],[data-v],[data-k],[data-d],[data-m]',ph).forEach(e=>{for(const k of [...e.attributes].map(x=>x.name))if(/^data-(r|c|x|i|k|d|m)$/.test(k))e.removeAttribute(k)});
+  $$('*',ph).forEach(e=>{for(const k of [...e.attributes].map(x=>x.name))if(/^data-(r|c|x|i|k|d|m|a|g|s|rec|fit)$/.test(k))e.removeAttribute(k)});
+  $$('.r-anim,.r-nudge',ph).forEach(e=>e.classList.remove('r-anim','r-nudge'));
+  $$('.dp-d.td',ph).forEach(e=>e.classList.remove('td')); /* отметка «сегодня» в календаре зависит от дня выгрузки — в эталон не идёт */
   return ph.outerHTML;
 }
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 window.__exportScreens=async function(o={}){
-  const URL=o.url||'http://127.0.0.1:8767/save';
+  const OUT=window.__screens={};
   const appCss=$$('style').map(s=>s.textContent).find(t=>t.includes('/* Прототип:'));
   const fonts=$('link[href*="fonts.googleapis"]').outerHTML;
   const index=[];
@@ -83,7 +125,10 @@ window.__exportScreens=async function(o={}){
   };
   const VARIANTS=[['home-b',['320x568','667x375']],['s4-filled',['320x568','667x375','kb']],['s7-intro-form',['320x568','667x375','kb']],
     ['s7-section-4-intro',['320x568','667x375']],['s7-question-long-x',['320x568','667x375']],['s7-free-answer-filled',['320x568','kb']],
-    ['s7-break-8',['320x568','667x375']],['chat-all-states',['320x568','667x375','kb']],['s2-login',['320x568','kb']]];
+    ['s7-break-8',['320x568','667x375']],['chat-all-states',['320x568','667x375','kb']],['s2-login',['320x568','kb']],
+    ['home-e',['320x568','667x375']],['home-f',['320x568','667x375']],['s4b-portrait',['320x568','667x375']],['s8-ready',['320x568','667x375']],
+    ['s9-plan-mid',['320x568','667x375']],['s12-rec-work',['320x568','667x375']],['s13-result-helped',['320x568','667x375','kb']],
+    ['s13-confirm-next',['320x568','667x375']],['s14-final',['320x568','667x375']]];
   const jobs=[];
   for(const e of LIST)jobs.push([e,'base']);
   for(const [id,vs] of VARIANTS){const e=LIST.find(x=>x[0]===id);vs.forEach(v=>jobs.push([e,v]))}
@@ -118,11 +163,11 @@ ${snapshot()}
 </body>
 </html>
 `;
-    await fetch(URL+'?name='+id+'.html',{method:'POST',mode:'no-cors',body:html});
+    OUT[id+'.html']=html;
     index.push({id,title,group,size:SIZES[v].label,file:`screens/${id}.html`,route:P().cur()});
   }
   SIZES.base.set();
-  await fetch(URL+'?name=index.json',{method:'POST',mode:'no-cors',body:JSON.stringify(index,null,1)});
+  OUT['index.json']=JSON.stringify(index,null,1)+'\n';
   return index.length;
 };
 })();

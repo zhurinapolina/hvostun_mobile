@@ -1,0 +1,15 @@
+{
+ "_comment": "GET /plan: портрет готов, рекомендацию ещё готовят — карточка «Готовим рекомендацию».",
+ "status": "preparing",
+ "week": 1,
+ "not_fit_left": 2,
+ "current": null,
+ "returned": null,
+ "passed": [],
+ "can_return": false,
+ "summary": {
+  "helped": 0,
+  "partial": 0,
+  "not_fit": 0
+ }
+}

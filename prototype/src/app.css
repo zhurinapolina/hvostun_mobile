@@ -111,7 +111,7 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 #app .ta,#app .bs textarea{font-size:16px}
 #app.kb .nv,#app.kb .aiw{display:none}
 #app .bs{padding-bottom:calc(28px + var(--sab));max-height:calc(100% - 8px);box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain}
-@container app (max-height:420px){#app .bs{gap:8px;padding-top:12px}#app .bs textarea{min-height:56px}}
+@container app (max-height:440px){#app .bs{gap:8px;padding-top:12px}#app .bs textarea{min-height:56px}}
 @container app (max-height:200px){#app .ph>.hd.hd{height:40px}#app .hd .ic{width:36px;height:36px}#app .ph .ms{padding-top:4px;padding-bottom:4px}#app.kb .ph .ip{padding-top:2px;padding-bottom:4px}}
 #app.kb .bs{padding-bottom:16px}
 #app.kb .ph .ip{padding-bottom:8px}
@@ -127,7 +127,7 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 /* чат на невысоком экране с клавиатурой: поле ввода и «Отправить» всегда видны */
 #app .ta{max-height:min(128px,20cqh)}
 @container app (max-height:560px){#app.kb .ph>.sf{display:none}}
-@container app (max-height:420px){
+@container app (max-height:440px){
   #app .ph>.hd{height:48px}
   #app .ph>.sf{margin:8px 16px 0;padding:8px 12px;font-size:12px;line-height:1.35}
   #app .ph>.sf br{display:none}
@@ -178,7 +178,7 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 #toast.on{opacity:1;transform:none}
 
 /* оболочка на широком экране: телефон и пульт */
-@media (min-width:760px) and (min-height:560px){
+@media (min-width:500px) and (min-height:500px){
   html,body{background:var(--shell)}
   #stage{align-items:center;justify-content:center;gap:40px;padding:24px;box-sizing:border-box}
   #panel{display:flex;flex-direction:column;gap:18px;width:280px;max-height:100%;overflow:auto;flex:none;padding:4px}
@@ -187,7 +187,9 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
   #frame.kbsim #kbd{display:flex;flex:none;height:var(--kh);align-items:center;justify-content:center;background:#d5d8df;color:#59617f;font-size:13px}
   #frame.kbsim #app{--sab:0px}
 }
-@media (max-width:759px),(max-height:559px){#frame{display:contents}}
+@media (max-width:499px),(max-height:499px){#frame{display:contents}}
+/* окно уже 760: телефон по центру, пульт не помещается */
+@media (max-width:759px){#stage #panel{display:none}}
 #panel h1{margin:0;font-family:Oswald,Impact,sans-serif;font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;color:var(--blue)}
 #panel p{margin:0;font-size:13px;line-height:1.45;color:var(--sub)}
 #panel h2{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--sub)}
@@ -213,3 +215,114 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 #app .sec-t{overflow-wrap:break-word;hyphens:auto}
 @container app (max-width:359px){#app .mn.anq .sec-t{font-size:34px}}
 #app .sup>*{max-width:100%}
+
+/* ===== главная, профиль, портрет, план, рекомендация, результат ===== */
+#app .mn>*{flex-shrink:0}
+#app .r-scr{flex:1 1 0;min-height:0;display:block;overflow-x:hidden;overflow-y:auto;scrollbar-width:none;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#app .r-scr::-webkit-scrollbar{display:none}
+#app .r-scr>div{display:flex;flex-direction:column;min-height:100%}
+#app .ph:has(>.r-scr){padding-top:0}
+#app .r-top{padding-top:var(--sat);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app .r-top .pic{top:calc(64px + var(--sat))}
+#app .r-pf{height:calc(132px + var(--sat));padding-top:var(--sat);box-sizing:border-box}
+#app .r-sheet{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app .ph:has(.r-pn){padding-bottom:0}
+#app .r-pn{padding-bottom:calc(16px + var(--sab));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app .ph>.sb{position:absolute;right:4px;width:3px;border-radius:2px;background:rgba(27,36,64,.32);z-index:2;pointer-events:none}
+#app .r-bs{padding-bottom:calc(20px + var(--sab));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;touch-action:pan-y;transition:transform .2s ease-out;animation:r-up .28s ease-out}
+#app .r-bs>*{flex-shrink:0}
+#app .r-ov{animation:r-fade .2s ease-out}
+#app .r-bs textarea,#app .r-fl textarea{font-size:16px}
+#app.kb .r-bs{padding-bottom:16px}
+#app .r-it,#app .r-gh,#app .r-rc,#app .r-pd,#app .r-acc .hh{cursor:pointer;-webkit-user-select:none;user-select:none}
+#app .r-rc.dis{cursor:default}
+#app .r-emp{flex:1 1 0;min-height:0;overflow:hidden}
+#app .ph.g:has(.r-fest){padding-bottom:0}
+#app .r-fest{flex:1 1 0;min-height:0;overflow-y:auto;scrollbar-width:none;padding-top:calc(12px + var(--sat))}
+#app .r-fest>*{flex-shrink:0}
+#app .r-more,#app .r-pn .res a,#app .g .r-fb .lk{min-height:36px;display:inline-flex;align-items:center}
+#app .r-more{margin-block:-8px}
+#app .r-fest{--pich:clamp(96px,24cqh,220px)}
+#app .r-fest .pic{height:var(--pich);margin-top:clamp(4px,2cqh,24px)}
+#app .r-cur:has(>.pic) .t{max-width:calc(100% - 112px)}
+#app .r-top:has(>.pic) .t{max-width:min(222px,calc(100% - 130px))}
+#app .r-fb{padding-bottom:calc(24px + var(--sab))}
+/* отклик на действия */
+#app .r-bx{transition:background-color .15s ease,box-shadow .15s ease}
+#app .r-it.on .r-bx svg{animation:r-pop .2s ease-out}
+#app .r-it>span:last-child{transition:color .15s ease}
+#app .r-bar i{transition:width .35s ease}
+#app .r-ct{transition:background-color .2s ease,color .2s ease}
+#app .r-cur.r-anim{animation:r-in .4s ease-out}
+/* пока рекомендацию не взяли в работу, пункты читаются, но отметить их нельзя */
+#app .r-lock .r-it{cursor:default}
+#app .r-lock .r-bx{background:#f3f1ec;box-shadow:inset 0 0 0 1.5px rgba(27,36,64,.14)}
+#app .r-lock .r-it.on .r-bx{background:#b9c2de;box-shadow:none}
+#app .r-lock .r-it.on>span:last-child{color:#1b2440}
+#app .r-nudge{animation:r-nudge .45s ease-out}
+@keyframes r-nudge{30%{transform:scale(1.04)}60%{transform:scale(.99)}}
+#app .r-rc{transition:background-color .15s ease,box-shadow .15s ease}
+#app .r-emp.wait .dg{animation:r-sway 1.4s ease-in-out infinite alternate;transform-origin:50% 100%}
+#app .r-dots i{animation:dot 1s infinite ease-in-out}
+#app .r-dots i:nth-child(2){animation-delay:.15s}
+#app .r-dots i:nth-child(3){animation-delay:.3s}
+#app .r-fest .r-sp{animation:r-pop .45s ease-out both}
+#app .r-fest .r-sp:nth-of-type(2){animation-delay:.12s}
+#app .r-fest .r-sp:nth-of-type(3){animation-delay:.24s}
+#app .r-fest .r-sp:nth-of-type(4){animation-delay:.36s}
+#app .r-fest .r-sp:nth-of-type(5){animation-delay:.48s}
+#app .r-fest .pic .dg{animation:r-in .5s ease-out both}
+@keyframes r-in{from{opacity:0;transform:translateY(24px) scale(.97)}}
+@keyframes r-up{from{transform:translateY(100%)}}
+@keyframes r-fade{from{opacity:0}}
+@keyframes r-pop{from{transform:scale(.3);opacity:0}}
+@keyframes r-sway{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+@media (prefers-reduced-motion:reduce){#app .r-bs,#app .r-ov,#app .r-cur.r-anim,#app .r-nudge,#app .r-emp.wait .dg,#app .r-fest .r-sp,#app .r-fest .pic .dg,#app .r-it.on .r-bx svg,#app .r-dots i{animation:none}#app .r-bar i{transition:none}}
+/* маленькие и невысокие экраны */
+@container app (max-width:359px){
+  #app .r-h1{font-size:33px}
+  #app .r-cur .t{font-size:20px}
+  #app .r-cur:has(>.pic) .t{max-width:calc(100% - 92px)}
+  #app .r-cur .pic{width:84px;height:76px}
+  #app .r-top .t{font-size:21px;max-width:172px}
+  #app .r-top .pic{width:92px;height:88px}
+  #app .r-nc .nm{font-size:34px}
+  #app .r-fest .hero{font-size:32px}
+  #app .r-bs .ttl{font-size:20px}
+  #app .r-sc{padding:12px}
+  #app .r-pm{grid-template-columns:1fr}
+}
+@container app (max-height:640px){
+  #app .r-day{min-height:96px}
+  #app .r-top{min-height:200px;padding-bottom:40px}
+  #app .r-fest .hero{font-size:32px;margin-top:6px}
+  #app .r-sum div{padding:8px 4px}
+  #app .r-sum div b{font-size:26px}
+}
+@container app (max-height:460px){
+  #app .r-pf{height:calc(96px + var(--sat))}
+  #app .r-fest .pic,#app .r-fest .r-sp{display:none}
+  #app .r-emp .dg{max-height:90px}
+  #app .r-bs{max-height:100%}
+}
+
+/* окно уже 760: пульт не помещается рядом — открывается кнопкой «Экраны» поверх */
+#pbtn{display:none}
+@media (min-width:500px) and (max-width:759px) and (min-height:500px){
+  #pbtn{display:inline-flex;align-items:center;gap:8px;position:fixed;z-index:30;left:12px;top:12px;height:40px;padding:0 14px;border:0;border-radius:999px;background:#ffffff;color:#1b2440;font:600 14px Onest,system-ui,sans-serif;cursor:pointer;box-shadow:0 1px 2px rgba(27,36,64,.08),0 8px 18px -8px rgba(27,36,64,.35)}
+  #pbtn:focus-visible{outline:2px solid #3352a3;outline-offset:2px}
+  body.pn #stage #panel{display:flex;position:fixed;z-index:20;left:0;top:0;bottom:0;width:min(300px,86vw);max-height:none;box-sizing:border-box;padding:64px 14px 20px;background:#e9e7e1;box-shadow:0 0 0 100vmax rgba(27,36,64,.28),12px 0 32px -16px rgba(27,36,64,.4);overflow-y:auto}
+}
+
+/* самые тесные случаи: экран уже 320 с крупным шрифтом и горизонтальное положение с открытой клавиатурой */
+#app .r-pd .r-st{max-width:100%}
+@container app (max-width:319px){
+  #app .r-st{white-space:normal;height:auto;min-height:28px;padding-top:3px;padding-bottom:3px;line-height:1.2}
+  #app .r-sum{gap:4px}
+  #app .r-sum div{padding-left:2px;padding-right:2px;overflow-wrap:anywhere;text-align:center}
+}
+@container app (max-height:240px){
+  #app.kb .ph .free{min-height:0;height:52px}
+  #app.kb .ph .ft{padding-top:6px;padding-bottom:6px}
+  #app.kb .ph .ft .b1,#app.kb .ph .ft .b0,#app.kb .ph .ft .b2{height:40px;min-height:40px}
+}

@@ -73,10 +73,34 @@
  },
  {
   "id": "home-d",
-  "title": "S3 · Главная D: анкета пройдена",
+  "title": "S3 · Главная D: анкета пройдена, портрет не собран",
   "group": "Главная",
   "size": "390 × 844",
   "file": "screens/home-d.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-e-new",
+  "title": "S3 · Главная E: выдана новая рекомендация",
+  "group": "Главная",
+  "size": "390 × 844",
+  "file": "screens/home-e-new.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-e",
+  "title": "S3 · Главная E: рекомендация в работе",
+  "group": "Главная",
+  "size": "390 × 844",
+  "file": "screens/home-e.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-f",
+  "title": "S3 · Главная F: маршрут пройден",
+  "group": "Главная",
+  "size": "390 × 844",
+  "file": "screens/home-f.html",
   "route": "s3"
  },
  {
@@ -128,19 +152,19 @@
   "route": "s4"
  },
  {
-  "id": "s4b-first",
-  "title": "S4b · Вкладка «Профиль», первый заход",
+  "id": "s4b-profile",
+  "title": "S4b · Профиль: форма заполнена, анкеты ещё нет",
   "group": "Профиль",
   "size": "390 × 844",
-  "file": "screens/s4b-first.html",
+  "file": "screens/s4b-profile.html",
   "route": "s4b"
  },
  {
-  "id": "s4b-repeat",
-  "title": "S4b · Вкладка «Профиль», повторный заход",
+  "id": "s4b-portrait",
+  "title": "S4b · Профиль после анкеты: данные анкеты и портрет",
   "group": "Профиль",
   "size": "390 × 844",
-  "file": "screens/s4b-repeat.html",
+  "file": "screens/s4b-portrait.html",
   "route": "s4b"
  },
  {
@@ -360,12 +384,260 @@
   "route": "aq:fr:3"
  },
  {
-  "id": "s9-plan-stub",
-  "title": "S9 · План: заглушка «Сервис в разработке»",
+  "id": "s8-building",
+  "title": "S8 · Портрет собирается",
+  "group": "Портрет",
+  "size": "390 × 844",
+  "file": "screens/s8-building.html",
+  "route": "s8"
+ },
+ {
+  "id": "s8-ready",
+  "title": "S8 · Портрет готов",
+  "group": "Портрет",
+  "size": "390 × 844",
+  "file": "screens/s8-ready.html",
+  "route": "s8"
+ },
+ {
+  "id": "s8-error",
+  "title": "S8 · Портрет не собрался",
+  "group": "Портрет",
+  "size": "390 × 844",
+  "file": "screens/s8-error.html",
+  "route": "s8"
+ },
+ {
+  "id": "s9-plan-new",
+  "title": "S9 · План: выдана первая рекомендация",
   "group": "План",
   "size": "390 × 844",
-  "file": "screens/s9-plan-stub.html",
-  "route": "s9"
+  "file": "screens/s9-plan-new.html",
+  "route": "pl"
+ },
+ {
+  "id": "s9-plan-work",
+  "title": "S9 · План: рекомендация в работе",
+  "group": "План",
+  "size": "390 × 844",
+  "file": "screens/s9-plan-work.html",
+  "route": "pl"
+ },
+ {
+  "id": "s9-plan-mid",
+  "title": "S9 · План: середина маршрута, есть пройденные и отложенная",
+  "group": "План",
+  "size": "390 × 844",
+  "file": "screens/s9-plan-mid.html",
+  "route": "pl"
+ },
+ {
+  "id": "s9-plan-limit",
+  "title": "S9 · План: обе отложенные использованы, подсказка о лимите",
+  "group": "План",
+  "size": "390 × 844",
+  "file": "screens/s9-plan-limit.html",
+  "route": "pl"
+ },
+ {
+  "id": "s9-plan-returned",
+  "title": "S9 · План: вернули отложенную, следующая ждёт",
+  "group": "План",
+  "size": "390 × 844",
+  "file": "screens/s9-plan-returned.html",
+  "route": "pl"
+ },
+ {
+  "id": "s9-plan-done",
+  "title": "S9 · План: маршрут пройден",
+  "group": "План",
+  "size": "390 × 844",
+  "file": "screens/s9-plan-done.html",
+  "route": "pl"
+ },
+ {
+  "id": "s9-plan-done-returned",
+  "title": "S9 · План: маршрут пройден, вернулись к отложенной",
+  "group": "План",
+  "size": "390 × 844",
+  "file": "screens/s9-plan-done-returned.html",
+  "route": "pl"
+ },
+ {
+  "id": "s12-rec-new",
+  "title": "S12 · Рекомендация «Новая»: пункты видны, отметить нельзя",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-new.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-new-limit",
+  "title": "S12 · «Новая», лимит «Не подошла» исчерпан",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-new-limit.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-work",
+  "title": "S12 · Рекомендация «В работе»: часть пунктов отмечена",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-work.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-work-why-open",
+  "title": "S12 · «В работе»: «Почему это важно» раскрыто",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-work-why-open.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-work-all-checked",
+  "title": "S12 · «В работе»: всё отмечено",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-work-all-checked.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-helped",
+  "title": "S12 · Пройденная: «Помогла», результат можно изменить",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-helped.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-partial",
+  "title": "S12 · Пройденная: «Помогла частично»",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-partial.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-notfit",
+  "title": "S12 · Отложенная: можно вернуть",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-notfit.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-notfit-blocked",
+  "title": "S12 · Отложенная: вернуть нельзя, пока текущая в работе",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-notfit-blocked.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-returned",
+  "title": "S12 · Возвращённая в работу: «Отложить снова»",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-returned.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-last",
+  "title": "S12 · Последняя рекомендация маршрута",
+  "group": "Рекомендация",
+  "size": "390 × 844",
+  "file": "screens/s12-rec-last.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result",
+  "title": "S13 · Результат: ничего не выбрано, «Сохранить» неактивна",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-result.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-helped",
+  "title": "S13 · Результат: выбрано «Помогла», критерии раскрыты",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-result-helped.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-notfit",
+  "title": "S13 · Результат: «Не подошла», первая отложенная",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-result-notfit.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-notfit-second",
+  "title": "S13 · Результат: «Не подошла», вторая отложенная",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-result-notfit-second.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-limit",
+  "title": "S13 · Результат: «Не подошла» недоступна",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-result-limit.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-saving",
+  "title": "S13 · Результат: сохранение",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-result-saving.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-edit",
+  "title": "S13 · Изменение результата у пройденной",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-result-edit.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-confirm-next",
+  "title": "S13 · Подтверждение: открыта следующая рекомендация",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-confirm-next.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-confirm-notfit",
+  "title": "S13 · Подтверждение после «Не подошла» с комментарием",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-confirm-notfit.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-confirm-back",
+  "title": "S13 · Подтверждение: возвращаемся к текущей рекомендации",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-confirm-back.html",
+  "route": "rec"
+ },
+ {
+  "id": "s14-final",
+  "title": "S14 · Маршрут пройден",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s14-final.html",
+  "route": "s14"
  },
  {
   "id": "chat-empty",
@@ -558,5 +830,157 @@
   "size": "390 × 844, открыта клавиатура",
   "file": "screens/s2-login--kb.html",
   "route": "s2"
+ },
+ {
+  "id": "home-e--320x568",
+  "title": "S3 · Главная E: рекомендация в работе · маленький телефон 320 × 568",
+  "group": "Главная",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/home-e--320x568.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-e--667x375",
+  "title": "S3 · Главная E: рекомендация в работе · горизонтально 667 × 375",
+  "group": "Главная",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/home-e--667x375.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-f--320x568",
+  "title": "S3 · Главная F: маршрут пройден · маленький телефон 320 × 568",
+  "group": "Главная",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/home-f--320x568.html",
+  "route": "s3"
+ },
+ {
+  "id": "home-f--667x375",
+  "title": "S3 · Главная F: маршрут пройден · горизонтально 667 × 375",
+  "group": "Главная",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/home-f--667x375.html",
+  "route": "s3"
+ },
+ {
+  "id": "s4b-portrait--320x568",
+  "title": "S4b · Профиль после анкеты: данные анкеты и портрет · маленький телефон 320 × 568",
+  "group": "Профиль",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/s4b-portrait--320x568.html",
+  "route": "s4b"
+ },
+ {
+  "id": "s4b-portrait--667x375",
+  "title": "S4b · Профиль после анкеты: данные анкеты и портрет · горизонтально 667 × 375",
+  "group": "Профиль",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/s4b-portrait--667x375.html",
+  "route": "s4b"
+ },
+ {
+  "id": "s8-ready--320x568",
+  "title": "S8 · Портрет готов · маленький телефон 320 × 568",
+  "group": "Портрет",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/s8-ready--320x568.html",
+  "route": "s8"
+ },
+ {
+  "id": "s8-ready--667x375",
+  "title": "S8 · Портрет готов · горизонтально 667 × 375",
+  "group": "Портрет",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/s8-ready--667x375.html",
+  "route": "s8"
+ },
+ {
+  "id": "s9-plan-mid--320x568",
+  "title": "S9 · План: середина маршрута, есть пройденные и отложенная · маленький телефон 320 × 568",
+  "group": "План",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/s9-plan-mid--320x568.html",
+  "route": "pl"
+ },
+ {
+  "id": "s9-plan-mid--667x375",
+  "title": "S9 · План: середина маршрута, есть пройденные и отложенная · горизонтально 667 × 375",
+  "group": "План",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/s9-plan-mid--667x375.html",
+  "route": "pl"
+ },
+ {
+  "id": "s12-rec-work--320x568",
+  "title": "S12 · Рекомендация «В работе»: часть пунктов отмечена · маленький телефон 320 × 568",
+  "group": "Рекомендация",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/s12-rec-work--320x568.html",
+  "route": "rec"
+ },
+ {
+  "id": "s12-rec-work--667x375",
+  "title": "S12 · Рекомендация «В работе»: часть пунктов отмечена · горизонтально 667 × 375",
+  "group": "Рекомендация",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/s12-rec-work--667x375.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-helped--320x568",
+  "title": "S13 · Результат: выбрано «Помогла», критерии раскрыты · маленький телефон 320 × 568",
+  "group": "Результат",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/s13-result-helped--320x568.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-helped--667x375",
+  "title": "S13 · Результат: выбрано «Помогла», критерии раскрыты · горизонтально 667 × 375",
+  "group": "Результат",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/s13-result-helped--667x375.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-helped--kb",
+  "title": "S13 · Результат: выбрано «Помогла», критерии раскрыты · 390 × 844, открыта клавиатура",
+  "group": "Результат",
+  "size": "390 × 844, открыта клавиатура",
+  "file": "screens/s13-result-helped--kb.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-confirm-next--320x568",
+  "title": "S13 · Подтверждение: открыта следующая рекомендация · маленький телефон 320 × 568",
+  "group": "Результат",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/s13-confirm-next--320x568.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-confirm-next--667x375",
+  "title": "S13 · Подтверждение: открыта следующая рекомендация · горизонтально 667 × 375",
+  "group": "Результат",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/s13-confirm-next--667x375.html",
+  "route": "rec"
+ },
+ {
+  "id": "s14-final--320x568",
+  "title": "S14 · Маршрут пройден · маленький телефон 320 × 568",
+  "group": "Результат",
+  "size": "маленький телефон 320 × 568",
+  "file": "screens/s14-final--320x568.html",
+  "route": "s14"
+ },
+ {
+  "id": "s14-final--667x375",
+  "title": "S14 · Маршрут пройден · горизонтально 667 × 375",
+  "group": "Результат",
+  "size": "горизонтально 667 × 375",
+  "file": "screens/s14-final--667x375.html",
+  "route": "s14"
  }
 ]

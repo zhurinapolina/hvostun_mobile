@@ -1,0 +1,458 @@
+openapi: 3.0.3
+info:
+  title: Хвостун — запросы мобильного интерфейса
+  version: "1"
+  description: |
+    Предложение формы данных между интерфейсом и сервером. Названия и структуру можно менять:
+    главное, чтобы экраны получили перечисленные поля. Что на каком экране нужно — docs/handoff.md, раздел 9.
+    Готовые примеры ответов — api/examples. Места в прототипе, которые заменяет каждый запрос,
+    помечены в prototype/src/app.js комментарием «СЕРВЕР:».
+
+    Общие правила:
+    - очередь рекомендаций, лимит «Не подошла» и номер недели считает сервер; интерфейс только показывает то, что пришло;
+    - будущие рекомендации, номер шага и общее число шагов интерфейсу не отдаются;
+    - что пользователю сейчас разрешено, сервер присылает готовым (поле actions у рекомендации);
+    - ошибки приходят с кодом, по которому интерфейс выбирает текст и вид (схема Error).
+servers:
+  - url: /api
+paths:
+  /auth/login:
+    post:
+      summary: Вход (S2)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [login, password, consent]
+              properties:
+                login: {type: string}
+                password: {type: string}
+                consent: {type: boolean, description: отметка согласия на экране входа}
+                consent_version: {type: string}
+      responses:
+        "200": {description: Сессия открыта, content: {application/json: {schema: {$ref: "#/components/schemas/Me"}}}}
+        "401": {description: "Неверные данные — E2; много попыток — E3", content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "503": {description: "Сервис недоступен — E6", content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /auth/logout:
+    post:
+      summary: Выход (профиль, «Выйти»)
+      responses:
+        "204": {description: Сессия закрыта}
+  /me:
+    get:
+      summary: Статусы пользователя — по ним выбирается состояние главной и доступность пунктов меню
+      responses:
+        "200": {description: Статусы, content: {application/json: {schema: {$ref: "#/components/schemas/Me"}}}}
+  /profile:
+    get:
+      summary: Профиль питомца или его черновик (S4, S4b)
+      responses:
+        "200": {description: Профиль, content: {application/json: {schema: {$ref: "#/components/schemas/Profile"}}}}
+    post:
+      summary: Сохранить профиль с проверкой всех полей (S4, «Готово»)
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: "#/components/schemas/ProfileInput"}}}
+      responses:
+        "200": {description: Сохранено, profile_status = done, content: {application/json: {schema: {$ref: "#/components/schemas/Profile"}}}}
+        "422": {description: Ошибки по полям, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /profile/draft:
+    put:
+      summary: Сохранить черновик профиля без проверки (уход с формы), profile_status = partial
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: "#/components/schemas/ProfileInput"}}}
+      responses:
+        "204": {description: Сохранено}
+  /survey:
+    get:
+      summary: Ответы анкеты и место, где пользователь остановился (продолжение, в том числе на другом устройстве)
+      responses:
+        "200": {description: Анкета, content: {application/json: {schema: {$ref: "#/components/schemas/Survey"}}}}
+  /survey/start:
+    post:
+      summary: Начать анкету (S5, «Заполнить анкету»), survey_status = started
+      responses:
+        "204": {description: Начата}
+  /survey/intake:
+    put:
+      summary: Ответы раздела «Введение» (одна форма)
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: "#/components/schemas/SurveyIntake"}}}
+      responses:
+        "204": {description: Сохранено}
+        "422": {description: "Не заполнены обязательные поля: people, breed", content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /survey/answers/{question_id}:
+    put:
+      summary: Ответ на вопрос — сохраняется сразу при выборе
+      parameters:
+        - {name: question_id, in: path, required: true, schema: {type: integer, minimum: 1, maximum: 42}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value: {type: string, enum: ["0", "1", "2", "3", "4", "X"], description: X — «Не наблюдалось или неприменимо»}
+      responses:
+        "204": {description: Сохранено}
+  /survey/free/{section}:
+    put:
+      summary: Свободный ответ в конце раздела
+      parameters:
+        - {name: section, in: path, required: true, schema: {type: integer, minimum: 2, maximum: 8}}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, properties: {text: {type: string}}}}}
+      responses:
+        "204": {description: Сохранено}
+  /survey/position:
+    put:
+      summary: Где пользователь в анкете — для «Продолжить» на главной
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [position], properties: {position: {$ref: "#/components/schemas/SurveyPosition"}}}}}
+      responses:
+        "204": {description: Сохранено}
+  /survey/finish:
+    post:
+      summary: Анкета пройдена (последняя перебивка, «Собрать портрет»); сервер начинает собирать портрет и план
+      responses:
+        "202": {description: "survey_status = done, portrait_status = building", content: {application/json: {schema: {$ref: "#/components/schemas/Me"}}}}
+  /portrait:
+    get:
+      summary: Портрет собаки (S8, S4b). Пока status = building, интерфейс показывает «Собираем портрет…» и повторяет запрос
+      responses:
+        "200": {description: Портрет или его статус, content: {application/json: {schema: {$ref: "#/components/schemas/Portrait"}}}}
+  /portrait/retry:
+    post:
+      summary: Собрать портрет ещё раз (S8 «Не получилось собрать портрет», главная D)
+      responses:
+        "202": {description: Сборка запущена}
+  /plan:
+    get:
+      summary: План адаптации (S9, карточка на главной E и F)
+      responses:
+        "200": {description: План, content: {application/json: {schema: {$ref: "#/components/schemas/Plan"}}}}
+  /recommendations/{id}:
+    get:
+      summary: Рекомендация целиком (S12). Отдаётся только текущая, возвращённая и пройденные
+      parameters:
+        - {$ref: "#/components/parameters/RecId"}
+      responses:
+        "200": {description: Рекомендация, content: {application/json: {schema: {$ref: "#/components/schemas/Recommendation"}}}}
+        "404": {description: Рекомендация ещё не выдана, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /recommendations/{id}/take:
+    post:
+      summary: «Беру в работу» — new → in_progress. После этого пункты чек-листа можно отмечать
+      parameters:
+        - {$ref: "#/components/parameters/RecId"}
+      responses:
+        "200": {description: Обновлённая рекомендация, content: {application/json: {schema: {$ref: "#/components/schemas/Recommendation"}}}}
+  /recommendations/{id}/items/{item_id}:
+    put:
+      summary: Поставить или снять отметку у пункта чек-листа. Доступно, когда рекомендация в работе
+      parameters:
+        - {$ref: "#/components/parameters/RecId"}
+        - {name: item_id, in: path, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [checked], properties: {checked: {type: boolean}}}}}
+      responses:
+        "200":
+          description: Счётчики после изменения
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checked: {type: integer}
+                  total: {type: integer}
+        "409": {description: "Рекомендация не в работе — код not_in_progress", content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /recommendations/{id}/result:
+    post:
+      summary: Отметить или изменить результат (S13, «Сохранить»). Сервер сам решает, что выдать дальше
+      parameters:
+        - {$ref: "#/components/parameters/RecId"}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: {type: string, enum: [helped, partial, not_fit]}
+                comment: {type: string, maxLength: 500, description: при not_fit комментарий передаётся команде}
+      responses:
+        "200": {description: Что показать после сохранения, content: {application/json: {schema: {$ref: "#/components/schemas/ResultOutcome"}}}}
+        "409": {description: "«Не подошла» больше недоступна — код not_fit_limit", content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /recommendations/{id}/retry:
+    post:
+      summary: «Попробовать ещё раз» у отложенной — not_fit → in_progress, returned = true. Текущая ждёт
+      parameters:
+        - {$ref: "#/components/parameters/RecId"}
+      responses:
+        "200": {description: Обновлённая рекомендация, content: {application/json: {schema: {$ref: "#/components/schemas/Recommendation"}}}}
+        "409": {description: "Текущая рекомендация уже в работе — код blocked_by_current", content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /recommendations/{id}/postpone:
+    post:
+      summary: «Отложить снова» у возвращённой — in_progress → not_fit. Лимит «Не подошла» не тратится
+      parameters:
+        - {$ref: "#/components/parameters/RecId"}
+      responses:
+        "200": {description: Обновлённая рекомендация, content: {application/json: {schema: {$ref: "#/components/schemas/Recommendation"}}}}
+  /chat/messages:
+    get:
+      summary: История чата порциями при прокрутке вверх
+      parameters:
+        - {name: before, in: query, schema: {type: string}}
+        - {name: limit, in: query, schema: {type: integer, default: 30}}
+      responses:
+        "200": {description: Сообщения, content: {application/json: {schema: {type: array, items: {$ref: "#/components/schemas/ChatMessage"}}}}}
+    post:
+      summary: Отправить вопрос; в ответе сообщение пользователя и ответ ассистента с типом
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text, client_id]
+              properties:
+                text: {type: string}
+                client_id: {type: string, description: защита от двойной отправки при «Повторить»}
+      responses:
+        "200": {description: Сообщения, content: {application/json: {schema: {type: array, items: {$ref: "#/components/schemas/ChatMessage"}}}}}
+        "504": {description: Ассистент не ответил вовремя, content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+  /chat/messages/{id}:
+    delete:
+      summary: «Удалить» неотправленное сообщение
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      responses:
+        "204": {description: Удалено}
+  /chat/messages/{id}/feedback:
+    put:
+      summary: Оценка ответа «Полезно» / «Неполезно» и замечание
+      parameters:
+        - {name: id, in: path, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating: {type: string, enum: [up, down], nullable: true}
+                comment: {type: string, maxLength: 500}
+      responses:
+        "204": {description: Сохранено}
+  /events:
+    post:
+      summary: Событие аналитики (docs/handoff.md, раздел 10)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: {type: string}
+                screen: {type: string}
+                payload: {type: object}
+      responses:
+        "204": {description: Принято}
+components:
+  parameters:
+    RecId:
+      name: id
+      in: path
+      required: true
+      schema: {type: string}
+  schemas:
+    Me:
+      type: object
+      description: Один запрос, по которому интерфейс выбирает состояние главной (A–F) и доступность пунктов меню
+      required: [profile_status, survey_status, portrait_status, plan_status]
+      properties:
+        profile_status: {type: string, enum: [none, partial, done]}
+        survey_status: {type: string, enum: [none, started, done]}
+        survey_position: {$ref: "#/components/schemas/SurveyPosition"}
+        portrait_status: {type: string, enum: [none, building, ready, failed]}
+        plan_status: {type: string, enum: [none, preparing, active, done], description: "preparing — портрет готов, рекомендация ещё не выдана; done — маршрут пройден"}
+        dog_name: {type: string, nullable: true}
+    ProfileInput:
+      type: object
+      properties:
+        name: {type: string}
+        age: {type: string, description: один из шести вариантов формы}
+        sex: {type: string, enum: [мальчик, девочка]}
+        home_since: {type: string, format: date, description: не позже сегодняшнего дня}
+        origin: {type: string, description: один из шести вариантов формы}
+        first_dog: {type: string, description: один из трёх вариантов формы}
+    Profile:
+      allOf:
+        - $ref: "#/components/schemas/ProfileInput"
+        - type: object
+          properties:
+            status: {type: string, enum: [none, partial, done]}
+            breed: {type: string, nullable: true, description: "из анкеты; пустые значения не показываются"}
+            neutered: {type: string, nullable: true}
+            weight_kg: {type: number, nullable: true}
+            height_cm: {type: integer, nullable: true}
+    SurveyPosition:
+      type: string
+      nullable: true
+      description: "vv — «Введение»; in:N — вступление раздела N; q:N — вопрос N (1–42); fr:N — свободный ответ раздела N; pb:N — перебивка после раздела N"
+      example: "q:12"
+    SurveyIntake:
+      type: object
+      required: [people, breed]
+      properties:
+        people: {type: integer, minimum: 1}
+        kids: {type: string, enum: [да, нет]}
+        neutered: {type: string, enum: [да, нет]}
+        shelter_stay: {type: string, nullable: true, description: только если в профиле «Откуда собака» = «из приюта»}
+        breed: {type: string, enum: [метис, породистая]}
+        weight_kg: {type: number}
+        height_cm: {type: integer}
+        history: {type: string}
+        trainer: {type: string}
+    Survey:
+      type: object
+      properties:
+        status: {type: string, enum: [none, started, done]}
+        position: {$ref: "#/components/schemas/SurveyPosition"}
+        intake: {$ref: "#/components/schemas/SurveyIntake"}
+        answers: {type: object, additionalProperties: {type: string}, description: "номер вопроса → 0–4 или X"}
+        free: {type: object, additionalProperties: {type: string}, description: "номер раздела → текст"}
+    Portrait:
+      type: object
+      required: [status]
+      properties:
+        status: {type: string, enum: [building, ready, failed]}
+        survey_date: {type: string, format: date, description: дата анкеты, по которой составлен портрет}
+        blocks:
+          type: array
+          description: Текст приходит готовым, частями с заголовками; каждая часть — отдельная карточка
+          items:
+            type: object
+            properties:
+              title: {type: string}
+              text: {type: string}
+    RecStatus:
+      type: string
+      enum: [new, in_progress, helped, partial, not_fit]
+      description: "В интерфейсе: Новая, В работе, Помогла, Помогла частично, Не подошла"
+    RecCard:
+      type: object
+      description: Карточка рекомендации для плана и главной
+      required: [id, title, status, checked, total]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        status: {$ref: "#/components/schemas/RecStatus"}
+        color: {type: string, description: "цвет карточки из дизайн-системы: #cfe8f8 или #dedaf7"}
+        illustration: {type: string, description: ключ иллюстрации из набора интерфейса}
+        teaser: {type: string, description: первый абзац «Почему это важно» для карточки плана}
+        checked: {type: integer}
+        total: {type: integer}
+        returned: {type: boolean, description: рекомендацию вернули из отложенных и она сейчас в работе}
+    Plan:
+      type: object
+      required: [status, week, not_fit_left, passed]
+      properties:
+        status: {type: string, enum: [preparing, active, done]}
+        week: {type: integer, description: номер недели с регистрации для метки «Неделя N»}
+        not_fit_left: {type: integer, minimum: 0, maximum: 2, description: сколько раз ещё можно выбрать «Не подошла»}
+        current: {allOf: [{$ref: "#/components/schemas/RecCard"}], nullable: true, description: "рекомендация по очереди: new или in_progress; null, пока её готовят или когда маршрут пройден"}
+        returned: {allOf: [{$ref: "#/components/schemas/RecCard"}], nullable: true, description: "возвращённая из отложенных; пока она в работе, показывается вместо current, а current ждёт"}
+        passed: {type: array, items: {$ref: "#/components/schemas/RecCard"}, description: пройденные с результатом, в порядке выдачи}
+        can_return: {type: boolean, description: можно ли сейчас вернуть отложенную — подпись «Можно вернуться» у пройденных}
+        summary:
+          type: object
+          description: итог для экрана «Маршрут пройден» и главной F
+          properties:
+            helped: {type: integer}
+            partial: {type: integer}
+            not_fit: {type: integer}
+    Recommendation:
+      allOf:
+        - $ref: "#/components/schemas/RecCard"
+        - type: object
+          properties:
+            why: {type: array, items: {type: string}, description: абзацы блока «Почему это важно»}
+            intro: {type: string, nullable: true}
+            groups:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: {type: string}
+                  title: {type: string}
+                  note: {type: string, nullable: true}
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: {type: string}
+                        text: {type: string}
+                        kind: {type: string, enum: [action, note]}
+                        checked: {type: boolean}
+            terms: {type: array, items: {type: string}, description: блок «Сроки»}
+            criteria: {type: array, items: {type: string}, description: блок «Как понять, что получилось»}
+            result:
+              type: object
+              nullable: true
+              properties:
+                status: {type: string, enum: [helped, partial, not_fit]}
+                comment: {type: string}
+            actions:
+              type: object
+              description: Что сейчас разрешено — интерфейс по этим флагам рисует нижнюю панель и шторку результата
+              properties:
+                take: {type: boolean, description: «Беру в работу»}
+                check: {type: boolean, description: можно отмечать пункты}
+                result: {type: boolean, description: «Отметить результат» или «Изменить»}
+                not_fit: {type: boolean, description: в шторке доступен вариант «Не подошла»}
+                retry: {type: boolean, description: «Попробовать ещё раз» активна}
+                postpone: {type: boolean, description: «Отложить снова»}
+    ResultOutcome:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [next, back, preparing, done, edited]
+          description: |
+            next — открыта следующая рекомендация (подтверждение с её карточкой);
+            back — результат отмечен по возвращённой, возвращаемся к текущей;
+            preparing — следующую ещё готовят;
+            done — маршрут пройден, показать S14;
+            edited — изменён результат пройденной, подтверждения нет.
+        next: {allOf: [{$ref: "#/components/schemas/RecCard"}], nullable: true}
+        plan: {$ref: "#/components/schemas/Plan"}
+    ChatMessage:
+      type: object
+      properties:
+        id: {type: string}
+        role: {type: string, enum: [user, assistant]}
+        text: {type: string}
+        kind: {type: string, enum: [answer, off_topic, no_answer, urgent], nullable: true}
+        rating: {type: string, enum: [up, down], nullable: true}
+        created_at: {type: string, format: date-time}
+    Error:
+      type: object
+      required: [code]
+      properties:
+        code: {type: string, description: "код из каталога ошибок (E2, E3, E5, E6, …) или not_fit_limit, blocked_by_current, not_in_progress"}
+        message: {type: string}
+        fields: {type: object, additionalProperties: {type: string}, description: "ошибки по полям формы: поле → код"}

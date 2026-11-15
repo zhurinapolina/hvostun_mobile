@@ -1,0 +1,25 @@
+{
+ "_comment": "GET /plan: рекомендация в работе, отмечено 4 пункта из 20.",
+ "status": "active",
+ "week": 1,
+ "not_fit_left": 2,
+ "current": {
+  "id": "r1",
+  "title": "Проверьте, готов ли дом для собаки",
+  "status": "in_progress",
+  "color": "#cfe8f8",
+  "illustration": "rec-1",
+  "teaser": "Судя по ответам в анкете, часть трудностей может быть связана с тем, как дом устроен для собаки. Когда дом обустроен под неё, некоторые сложности могут стать мягче или уйти сами.",
+  "checked": 4,
+  "total": 20,
+  "returned": false
+ },
+ "returned": null,
+ "passed": [],
+ "can_return": false,
+ "summary": {
+  "helped": 0,
+  "partial": 0,
+  "not_fit": 0
+ }
+}
