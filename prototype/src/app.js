@@ -154,7 +154,8 @@ function anketa(r){
     /* «Далее» на вопросе нет: нажатие на вариант сохраняет ответ и само ведёт к следующему экрану.
        Если на вопрос уже отвечали (вернулись «Назад»), справа появляется «Вперёд» — пройти дальше, не меняя ответ;
        нажатие на любой вариант, в том числе на уже выбранный, тоже сохраняет его и ведёт дальше */
-    const fw=ft(p,r,false).next;fw.className='b2 fw';fw.disabled=false;fw.textContent='Вперёд';fw.hidden=st.ans[n]==null;
+    /* на макете у вопроса без ответа внизу только «Назад»: кнопку «Вперёд» добавляем здесь */
+    const fw=ft(p,r,false).next||$('.ft',p).appendChild(Object.assign(document.createElement('button'),{type:'button'}));fw.className='b2 fw';fw.disabled=false;fw.textContent='Вперёд';fw.hidden=st.ans[n]==null;
     fw.addEventListener('click',()=>go(nextOf(r)));
     const paint=()=>{$$('.op',m).forEach(o=>{const on=o.dataset.v===st.ans[n];o.classList.toggle('on',on);o.setAttribute('aria-checked',on)})};
     let t=0;
