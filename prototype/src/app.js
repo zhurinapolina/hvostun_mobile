@@ -33,7 +33,7 @@ function useSheet(key){
 function mount(key,cls){
   useSheet(key);
   const box=document.createElement('div');box.innerHTML=T[key];const ph=box.firstElementChild;
-  app.querySelector('.ph')?.remove();app.prepend(ph);
+  app.querySelector('.ph')?.remove();app.prepend(ph);nameIn(ph);
   const nv=ph.querySelector(':scope>.nv');if(nv)nv.outerHTML=navHTML(cls);
   const top=ph.classList.contains('g')?'#3352a3':'#ffffff',bot=nv?'#ffffff':top;
   document.documentElement.style.background=wide()?'':`linear-gradient(${top} 50%,${bot} 50%)`;
@@ -184,21 +184,13 @@ function vvForm(r){
     if(st.vv[k]===rd.value){rd.checked=true}rd.addEventListener('change',()=>{st.vv[k]=rd.value;mark(fs);clr(fs)})});mark(fs)});
   function mark(fs){$$('.cx',fs).forEach(l=>{const on=l.querySelector('input').checked;l.classList.toggle('on',on);const s=l.querySelector('svg');if(on&&!s)l.querySelector('input').insertAdjacentHTML('afterend',ICON.check);if(!on&&s)s.remove()})}
   function clr(el){el.classList.remove('miss');el.querySelector(':scope>.et')?.remove();$('.in.er,.cs.er',el)?.classList.remove('er')}
-  function err(el,txt){clr(el);el.classList.add('miss');el.insertAdjacentHTML('beforeend',`<div class="et" role="alert">${ICON.warn}<span>${txt}</span></div>`);fitErr(el)}
-  const fb=ft(p,r,true);
-  /* все пункты «Введения» обязательные: числа больше нуля, в каждом вопросе выбран вариант, развёрнутый ответ не пустой */
-  fb.next.addEventListener('click',()=>{
-    const bad=[];
-    [...f.children].forEach(el=>{
-      if(el.matches('fieldset')){if(!$('input:checked',el)){err(el,'Выберите вариант');bad.push(el)}return}
-      if(!el.matches('.fl'))return;
-      const i=$('input.in,textarea',el),v=i.value.trim();
-      if(i.matches('textarea')){if(!v){err(el,'Напишите ответ');bad.push(el)}return}
-      if(!(parseFloat(v.replace(',','.'))>0)){err(el,'Укажите число');bad.push(el)}
-    });
-    if(bad.length){reveal(bad[0]);return}
-    go(nextOf(r));
-  });
+  const fb=ft(p,r,false);
+  /* обязательны все пункты «Введения», кроме текста об условиях жизни до вас: числа больше нуля, в каждом вопросе выбран вариант.
+     Пока они не заполнены, «Далее» неактивна; подсказок об ошибках нет */
+  const need=()=>$$('fieldset',f).every(fs=>$('input:checked',fs))&&$$('input.in',f).every(el=>parseFloat(el.value.replace(',','.'))>0);
+  const sync=()=>fb.set(need());
+  f.addEventListener('input',sync);f.addEventListener('change',sync);sync();
+  fb.next.addEventListener('click',()=>{if(need())go(nextOf(r))});
   sbar(p);
 }
 function e6(){const p=mount('e6');$('.ce .b1',p).addEventListener('click',()=>go('s3'))}
@@ -217,20 +209,16 @@ function s4(){
   function clear(el){el.classList.remove('miss');el.querySelector(':scope>.et')?.remove()}
   function err(el,txt){clear(el);el.classList.add('miss');el.insertAdjacentHTML('beforeend',`<div class="et" role="alert">${ICON.warn}<span>${txt}</span></div>`);fitErr(el)}
   name.addEventListener('input',()=>clear(name.closest('.fl')));
-  picker(date,()=>clear(date.closest('.fl')));
   const btn=$('.b1.w',f);btn.removeAttribute('data-r');
+  const dateOf=()=>{const m=date.value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);if(!m)return null;const dt=new Date(+m[3],+m[2]-1,+m[1]);return dt.getMonth()===+m[2]-1?dt:null};
+  /* «Готово» неактивна, пока не заполнены все поля: подсказок «заполните поле» нет */
+  const sync=()=>{if(busy)return;const ok=!!name.value.trim()&&Object.values(groups).every(g=>$('input:checked',g))&&!!dateOf();btn.disabled=!ok;btn.setAttribute('aria-disabled',!ok)};
+  f.addEventListener('input',sync);f.addEventListener('change',sync);
+  picker(date,()=>{clear(date.closest('.fl'));sync()});
+  sync();
   btn.addEventListener('click',()=>{
-    if(busy)return;const bad=[];
-    if(!name.value.trim()){err(name.closest('.fl'),'Укажите кличку');bad.push(name)}
-    const chk=(k,t)=>{if(!$('input:checked',groups[k])){err(groups[k],t);bad.push(groups[k])}};
-    chk('age','Выберите возраст');chk('sex','Выберите пол');
-    const m=date.value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);let dt=null;
-    if(m){dt=new Date(+m[3],+m[2]-1,+m[1]);if(dt.getMonth()!==+m[2]-1)dt=null}
-    if(!dt){err(date.closest('.fl'),'Укажите дату');bad.push(date)}
-    else if(dt>new Date()){err(date.closest('.fl'),'Дата в будущем');bad.push(date)}
-    chk('from','Выберите, откуда собака');
-    chk('first','Выберите вариант');
-    if(bad.length){reveal(bad[0].closest('.fl,fieldset,.sub')||bad[0]);return}
+    if(busy||btn.disabled)return;
+    if(dateOf()>new Date()){err(date.closest('.fl'),'Дата в будущем');reveal(date.closest('.fl'));return}
     saveDraft();busy=true;
     btn.setAttribute('aria-busy','true');btn.innerHTML=ICON.spin+'Готово';
     $$('input',f).forEach(i=>i.disabled=true);$$('.cx',f).forEach(c=>c.classList.add('dis'));
@@ -357,6 +345,28 @@ function chat(){
    Состояние маршрута: st.plan = {recs:[{s,ck,cm,ret,open}], cur, used, done, ready, results}
    s — none|new|work|helped|partial|notfit; ret — рекомендацию вернули из отложенных; used — сколько раз выбрано «Не подошла» (лимит 2). */
 const IC=(n,s)=>V.ic[n+':'+s];
+/* Кличка из профиля. В шаблонах экранов стоит пример «Джесси»; после слова «портрет» кличка нужна в родительном падеже.
+   Склонение здесь приблизительное, для прототипа: в продукте форму клички присылает сервер или текст строится без склонения. */
+function genName(n,sex){
+  n=String(n).trim();if(!/^[а-яё]+$/i.test(n))return n;                 // несколько слов, дефис, латиница — не склоняем
+  const up=n.length>1&&n===n.toUpperCase(),e=x=>up?x.toUpperCase():x,last=n.slice(-1).toLowerCase(),pre=n.slice(0,-1);
+  if(n.length>4&&/[ая]я$/i.test(n))return n.slice(0,-2)+e(/[жчшщ]ая$|яя$/i.test(n)?'ей':'ой'); // Рыжая → Рыжей, Белая → Белой
+  if(last==='я')return pre+e('и');                                        // Буся → Буси
+  if(last==='а')return pre+e(/[гкхжчшщ]$/i.test(pre)?'и':'ы');           // Белка → Белки, Луна → Луны
+  if(sex!=='мальчик')return n;                                            // Николь, Адель, Джесси
+  if(/ый$|[гкх]ий$/i.test(n))return n.slice(0,-2)+e('ого');               // Серый → Серого, Маленький → Маленького
+  if(/[жчшщ]ий$/i.test(n))return n.slice(0,-2)+e('его');                  // Рыжий → Рыжего
+  if(/ёк$/i.test(n))return n.slice(0,-2)+e('ька');                        // Васёк → Васька
+  if(/[^аеёиоуыэюя]ок$/i.test(n))return n.slice(0,-2)+e('ка');            // Дружок → Дружка
+  if(last==='й'||last==='ь')return pre+e('я');                            // Дизель → Дизеля
+  if(/[бвгджзклмнпрстфхцчшщ]/.test(last))return n+e('а');                 // Рекс → Рекса
+  return n;                                                               // Чарли, Лаки, Тото
+}
+function nameIn(root){
+  const n=(st.draft&&st.draft.name||'').trim();if(!n||n==='Джесси')return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),list=[];while(w.nextNode())if(w.currentNode.nodeValue.includes('Джесси'))list.push(w.currentNode);
+  list.forEach(t=>{t.nodeValue=t.nodeValue.replace(/([Пп]ортрет )Джесси/g,(m,a)=>a+genName(n,st.draft.sex)).replace(/Джесси/g,n)});
+}
 const escH=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const STAT={new:['Новая','dot'],work:['В работе','dot'],helped:['Помогла','check'],partial:['Помогла частично','half'],notfit:['Не подошла','pause']};
 const RES=['helped','partial','notfit'];
@@ -404,7 +414,7 @@ function s4b(){
   const pr=[['Возраст',d.age],['Пол',d.sex],['Дома с',d.date],['Откуда',d.from],['Первая собака',d.first]];
   if(ready)pr.push(['Порода',v.f3],['Стерилизация',v.f1],['Вес',v.t1&&v.t1+' кг'],['Рост в холке',v.t2&&v.t2+' см']);
   const pm=pr.filter(x=>x[1]).map(([k,x])=>`<div class="r-pi r-sh"${String(x).length>16?' style="grid-column:1/-1"':''}><span class="tt"><span>${k}</span><b>${escH(x)}</b></span></div>`).join('');
-  const por=ready?'<h2 class="r-h2" style="margin-top:8px">Портрет</h2>'+V.portrait.map(([t,x])=>`<section class="r-pc r-sh"><div class="hh">${t}</div><p>${escH(x.replace(/\{N\}/g,name))}</p></section>`).join('')+`<p class="r-sub">Портрет составлен по анкете от ${new Date().toLocaleDateString('ru-RU')}</p>`:'';
+  const por=ready?'<h2 class="r-h2" style="margin-top:8px">Портрет</h2>'+(d.sex==='мальчик'?V.portrait_m:V.portrait).map(([t,x])=>`<section class="r-pc r-sh"><div class="hh">${t}</div><p>${escH(x.replace(/\{N\}/g,name))}</p></section>`).join('')+`<p class="r-sub">Портрет составлен по анкете от ${new Date().toLocaleDateString('ru-RU')}</p>`:'';
   mountH(`<div class="ph">\n<div class="r-scr"><div><div class="r-pf"><div class="hd"><button class="ic" type="button" aria-label="Назад" data-r="home">${IC('back',22)}</button><span class="t"></span></div></div>`+
     `<div class="mn" style="flex:none;overflow:visible;padding-top:0"><div class="r-av"><img class="dg" src="${V.img.ava}" alt=""></div><div class="r-nc r-sh"><p class="nm">${escH(name)}</p></div>`+
     `<div class="r-pm">${pm}</div>${por}<h2 class="r-h2" style="margin-top:8px">Аккаунт</h2><div class="r-acct" style="margin-top:-12px"><a href="#" data-x="Здесь откроется Telegram команды">Написать команде</a><button type="button" data-r="s1">Выйти</button></div></div></div></div>\n<nav class="nv"></nav>\n</div>`,'profile');

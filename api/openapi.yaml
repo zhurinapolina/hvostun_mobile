@@ -84,7 +84,7 @@ paths:
         content: {application/json: {schema: {$ref: "#/components/schemas/SurveyIntake"}}}
       responses:
         "204": {description: Сохранено}
-        "422": {description: "Не заполнены обязательные поля (все поля формы; shelter_stay — только для собак из приюта)", content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
+        "422": {description: "Не заполнены обязательные поля (все поля формы, кроме history; shelter_stay — только для собак из приюта)", content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}}
   /survey/answers/{question_id}:
     put:
       summary: Ответ на вопрос — сохраняется сразу при выборе
@@ -314,8 +314,8 @@ components:
       example: "q:12"
     SurveyIntake:
       type: object
-      description: Все поля обязательные; shelter_stay — только если в профиле «Откуда собака» = «из приюта»
-      required: [people, kids, neutered, breed, weight_kg, height_cm, history, trainer]
+      description: Обязательны все поля, кроме history; shelter_stay — только если в профиле «Откуда собака» = «из приюта»
+      required: [people, kids, neutered, breed, weight_kg, height_cm, trainer]
       properties:
         people: {type: integer, minimum: 1}
         kids: {type: string, enum: [да, нет]}
@@ -324,7 +324,7 @@ components:
         breed: {type: string, enum: [метис, породистая]}
         weight_kg: {type: number, exclusiveMinimum: 0}
         height_cm: {type: integer, minimum: 1}
-        history: {type: string, minLength: 1}
+        history: {type: string, description: необязательное поле}
         trainer: {type: string}
     Survey:
       type: object

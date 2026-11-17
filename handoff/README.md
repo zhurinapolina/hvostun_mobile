@@ -64,8 +64,8 @@
 
 | Эталон | Экран и состояние | Маршрут в прототипе |
 |---|---|---|
-| [`s4-empty.html`](screens/s4-empty.html) | S4 · Профиль: пустая форма | `s4` |
-| [`s4-errors.html`](screens/s4-errors.html) | S4 · Профиль: все поля не заполнены | `s4` |
+| [`s4-empty.html`](screens/s4-empty.html) | S4 · Профиль: пустая форма, «Готово» неактивна | `s4` |
+| [`s4-partial.html`](screens/s4-partial.html) | S4 · Профиль: заполнена часть полей, «Готово» неактивна | `s4` |
 | [`s4-date-future.html`](screens/s4-date-future.html) | S4 · Профиль: дата в будущем | `s4` |
 | [`s4-calendar.html`](screens/s4-calendar.html) | S4 · Профиль: выбор даты | `s4` |
 | [`s4-filled.html`](screens/s4-filled.html) | S4 · Профиль: заполнено | `s4` |
@@ -80,8 +80,7 @@
 | [`s5-survey-start.html`](screens/s5-survey-start.html) | S5 · Анкета: вход | `s5` |
 | [`s7-intro-form.html`](screens/s7-intro-form.html) | S7 · Раздел 1 «Введение»: форма (собака из приюта) | `aq:vv` |
 | [`s7-intro-form-not-shelter.html`](screens/s7-intro-form-not-shelter.html) | S7 · «Введение»: собака не из приюта — без вопроса о сроке в приюте | `aq:vv` |
-| [`s7-intro-form-errors.html`](screens/s7-intro-form-errors.html) | S7 · «Введение»: ничего не заполнено — ошибка у каждого пункта | `aq:vv` |
-| [`s7-intro-form-filled.html`](screens/s7-intro-form-filled.html) | S7 · «Введение»: заполнено | `aq:vv` |
+| [`s7-intro-form-filled.html`](screens/s7-intro-form-filled.html) | S7 · «Введение»: заполнено, «Далее» активна | `aq:vv` |
 | [`s7-break-1.html`](screens/s7-break-1.html) | S7 · Перебивка после раздела 1 | `aq:pb:1` |
 | [`s7-break-2.html`](screens/s7-break-2.html) | S7 · Перебивка после раздела 2 | `aq:pb:2` |
 | [`s7-break-3.html`](screens/s7-break-3.html) | S7 · Перебивка после раздела 3 | `aq:pb:3` |

@@ -19,21 +19,24 @@ window.__flow=async function(){
   await click('Войти',1000);ok(P.cur()==='s3'&&/Привет/.test(all()),'вход → главная A ['+nav()+']');
   ok(!!$('#app .r-sc.lk'),'A: план и чат закрыты плитками');
   await click('Заполнить профиль');ok(P.cur()==='s4','карточка шага → форма профиля');
+  ok($('#app form .b1.w').disabled&&!$('#app form .et'),'профиль: «Готово» неактивна на пустой форме, подсказок об ошибках нет');
   setv($('#app form input[type=text],#app form input:not([type])'),'Джесси');
   const pick=async v=>{const l=$$('#app form label').find(e=>e.textContent.trim()===v);if(!l)log.push('!! нет '+v);else{l.click();await wait(15)}};
   await pick('6–12 месяцев');await pick('девочка');
   const d=$$('#app form input').filter(i=>!['radio','checkbox'].includes(i.type))[1];d.click();await wait(30);$('#app .dp-n').click();await wait(30);$$('#app .dp-d:not([disabled])')[4].click();await wait(30);
-  await pick('из приюта');await pick('нет, раньше были собаки');
+  await pick('из приюта');ok($('#app form .b1.w').disabled,'профиль: «Готово» неактивна, пока не заполнено последнее поле');
+  await pick('нет, раньше были собаки');ok(!$('#app form .b1.w').disabled,'профиль: всё заполнено — «Готово» активна');
   await click('Готово',1200);ok(P.cur()==='s3'&&/Получить план/.test(all())&&/Джесси/i.test($('#app .r-day').textContent),'главная B с кличкой ['+nav()+']');
   await click($$('#app .nv a')[1]);ok(P.cur()==='s4b'&&!/Портрет/.test(all())&&/Первая собака/.test(all()),'профиль до анкеты: данные формы, портрета нет');
   await click($('#app .hd .ic'));await click('Получить план');await click('Заполнить анкету');
-  // «Введение»: все пункты обязательные
-  await click('Далее');ok(P.cur()==='aq:vv'&&$$('#app form .miss').length===$$('#app form>.fl,#app form>fieldset').length&&$$('#app form .miss').length===9,'«Введение»: пустая форма не отправляется, ошибка у каждого из 9 пунктов');
+  // «Введение»: обязательны все пункты, кроме текста об условиях жизни; «Далее» неактивна, пока они не заполнены
+  ok(!!$('#app .ft .b0')&&$('#app .ft .b0').disabled&&!$('#app form .et'),'«Введение»: на пустой форме «Далее» неактивна, подсказок об ошибках нет');
   setv($('#app form input.in'),'3');for(const fs of $$('#app form fieldset')){fs.querySelector('label.cx').click();await wait(10)}
   await click($$('#app form label.cx').find(l=>l.textContent.trim()==='метис'),20);
   const kg=$$('#app .fl').find(f=>/вес/i.test(f.textContent)).querySelector('input'),cm=$$('#app .fl').find(f=>/рост/i.test(f.textContent)).querySelector('input');setv(kg,'25');setv(cm,'52');
-  await click('Далее');ok(P.cur()==='aq:vv'&&$$('#app form .miss').length===1&&/Напишите ответ/.test($('#app form .miss').textContent),'«Введение»: не заполнен развёрнутый ответ — дальше не пускает');
-  setv($('#app form textarea'),'Жила в приюте, гуляли раз в день');await click('Далее');ok(P.cur()==='aq:pb:1','«Введение» заполнено → перебивка 1');
+  ok(!!$('#app .ft .b1')&&!$('#app .ft .b1').disabled&&!$('#app form textarea').value,'«Введение»: обязательные заполнены, текст об условиях жизни пуст — «Далее» активна');
+  setv(cm,'');ok(!!$('#app .ft .b0'),'«Введение»: стёрли рост — «Далее» снова неактивна');setv(cm,'52');
+  await click('Далее');ok(P.cur()==='aq:pb:1','«Введение» заполнено → перебивка 1');
   // вопросы: «Далее» нет, выбор варианта сам ведёт дальше
   const PICK=340,fw=()=>$('#app .ft .fw'),back=()=>$('#app .ft .b2:not(.fw)');let g=0,n=0;
   while(!/^s8|^s3/.test(P.cur())&&g++<200){const c=P.cur();
@@ -101,6 +104,11 @@ window.__flow=async function(){
   await click($('#app [data-r=plan]'));await click($('#app .r-pd.notfit'));await click('Попробовать ещё раз');await click($('#app .hd .ic'));
   ok($$('#app .r-cur').length===1&&/Вы прошли все шаги/i.test(all()),'маршрут пройден + вернулись к отложенной: карточка в работе и итог');
   await click($$('#app .nv a')[3]);ok(P.cur()==='chat','чат');
+  // кличка и род берутся из профиля, а не из примера
+  P.st.draft.name='Барсик';P.st.draft.sex='мальчик';P.go('s8',{back:true});await wait(60);
+  ok(/Портрет Барсика/i.test(all())&&!/Джесси/i.test(all()),'S8: «Портрет Барсика готов»');
+  P.go('s3',{back:true});await wait(60);ok(/Барсик/i.test($('#app .r-day').textContent)&&/Портрет Барсика/.test(all())&&!/Джесси/i.test(all()),'главная: кличка из профиля во всех подписях');
+  P.go('s4b',{back:true});await wait(60);ok(/Кто он[^а]/.test(all())&&/Барсик — метис, ему/.test(all())&&!/Джесси/i.test(all()),'профиль: портрет в мужском роде с кличкой из профиля');
   }catch(e){log.push('EXC '+e.stack.split('\n').slice(0,3).join(' '))}
   return log.join('\n');
 };

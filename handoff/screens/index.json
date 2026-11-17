@@ -105,18 +105,18 @@
  },
  {
   "id": "s4-empty",
-  "title": "S4 · Профиль: пустая форма",
+  "title": "S4 · Профиль: пустая форма, «Готово» неактивна",
   "group": "Профиль",
   "size": "390 × 844",
   "file": "screens/s4-empty.html",
   "route": "s4"
  },
  {
-  "id": "s4-errors",
-  "title": "S4 · Профиль: все поля не заполнены",
+  "id": "s4-partial",
+  "title": "S4 · Профиль: заполнена часть полей, «Готово» неактивна",
   "group": "Профиль",
   "size": "390 × 844",
-  "file": "screens/s4-errors.html",
+  "file": "screens/s4-partial.html",
   "route": "s4"
  },
  {
@@ -192,16 +192,8 @@
   "route": "aq:vv"
  },
  {
-  "id": "s7-intro-form-errors",
-  "title": "S7 · «Введение»: ничего не заполнено — ошибка у каждого пункта",
-  "group": "Анкета",
-  "size": "390 × 844",
-  "file": "screens/s7-intro-form-errors.html",
-  "route": "aq:vv"
- },
- {
   "id": "s7-intro-form-filled",
-  "title": "S7 · «Введение»: заполнено",
+  "title": "S7 · «Введение»: заполнено, «Далее» активна",
   "group": "Анкета",
   "size": "390 × 844",
   "file": "screens/s7-intro-form-filled.html",

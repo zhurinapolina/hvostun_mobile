@@ -150,13 +150,14 @@ def dog(file, color):
 
 
 RECS = json.load(open(f"{PROTO}/recommendations.json", encoding="utf-8"))["recommendations"]
-PORTRAIT = json.load(open(f"{PROTO}/portrait.json", encoding="utf-8"))["blocks"]
+PORTRAIT = json.load(open(f"{PROTO}/portrait.json", encoding="utf-8"))
 PLAN = {"recs": [{"t": r["title"], "c": r["color"], "ill": dog(r["illustration"], "#24397a"), "why": r["why"], "intro": r["intro"],
                   "g": [[g["title"], [x["text"] for x in g["items"]], g["note"]] for g in r["groups"]], "terms": r["terms"], "crit": r["criteria"]} for r in RECS],
         "ic": {f"{n}:{s}": doodle.svg(n, s) for n in ("dot", "check", "half", "pause", "cal", "chev", "info", "warn", "target", "clock", "up", "close", "back", "spin")
                for s in (16, 18, 20, 22)},
         "img": {"ava": dog("avatar.svg", "#3352a3")},
-        "portrait": [[p["title"], p["text"]] for p in PORTRAIT]}
+        "portrait_m": [[p["title"], p["text"]] for p in PORTRAIT["blocks_male"]],
+        "portrait": [[p["title"], p["text"]] for p in PORTRAIT["blocks"]]}
 
 fonts = re.search(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>', B["V-Main"]).group(0)
 app_css = open(f"{PROTO}/app.css", encoding="utf-8").read()

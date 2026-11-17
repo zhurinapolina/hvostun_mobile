@@ -347,3 +347,7 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
   #app.kb .ph .ft{padding-top:6px;padding-bottom:6px}
   #app.kb .ph .ft .b1,#app.kb .ph .ft .b0,#app.kb .ph .ft .b2{height:40px;min-height:40px}
 }
+/* «Готово» в профиле неактивна, пока форма не заполнена: цвет неактивной кнопки, непрозрачный — под кнопкой прокручивается форма */
+#app .ph form.mn>.b1.w[disabled]{background:#edeef0;color:#6f7590;cursor:default;box-shadow:0 -18px 22px 10px #ffffff}
+/* длинная кличка одним словом переносится, а не вылезает за край */
+#app .r-fest .hero,#app .r-emp .ttl,#app .r-sc .d,#app .r-cur .t{overflow-wrap:anywhere}
