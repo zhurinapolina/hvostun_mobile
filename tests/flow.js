@@ -27,12 +27,27 @@ window.__flow=async function(){
   await click('Готово',1200);ok(P.cur()==='s3'&&/Получить план/.test(all())&&/Джесси/i.test($('#app .r-day').textContent),'главная B с кличкой ['+nav()+']');
   await click($$('#app .nv a')[1]);ok(P.cur()==='s4b'&&!/Портрет/.test(all())&&/Первая собака/.test(all()),'профиль до анкеты: данные формы, портрета нет');
   await click($('#app .hd .ic'));await click('Получить план');await click('Заполнить анкету');
-  setv($('#app form input.in'),'3');await click($$('#app form label.cx').find(l=>l.textContent.trim()==='метис'),20);
+  // «Введение»: все пункты обязательные
+  await click('Далее');ok(P.cur()==='aq:vv'&&$$('#app form .miss').length===$$('#app form>.fl,#app form>fieldset').length&&$$('#app form .miss').length===9,'«Введение»: пустая форма не отправляется, ошибка у каждого из 9 пунктов');
+  setv($('#app form input.in'),'3');for(const fs of $$('#app form fieldset')){fs.querySelector('label.cx').click();await wait(10)}
+  await click($$('#app form label.cx').find(l=>l.textContent.trim()==='метис'),20);
   const kg=$$('#app .fl').find(f=>/вес/i.test(f.textContent)).querySelector('input'),cm=$$('#app .fl').find(f=>/рост/i.test(f.textContent)).querySelector('input');setv(kg,'25');setv(cm,'52');
-  await click('Далее');let g=0,n=0;
-  while(!/^s8|^s3/.test(P.cur())&&g++<200){const c=P.cur();if(c.startsWith('aq:q:')){n++;$$('#app .op')[1].click();await wait(8)}
+  await click('Далее');ok(P.cur()==='aq:vv'&&$$('#app form .miss').length===1&&/Напишите ответ/.test($('#app form .miss').textContent),'«Введение»: не заполнен развёрнутый ответ — дальше не пускает');
+  setv($('#app form textarea'),'Жила в приюте, гуляли раз в день');await click('Далее');ok(P.cur()==='aq:pb:1','«Введение» заполнено → перебивка 1');
+  // вопросы: «Далее» нет, выбор варианта сам ведёт дальше
+  const PICK=340,fw=()=>$('#app .ft .fw'),back=()=>$('#app .ft .b2:not(.fw)');let g=0,n=0;
+  while(!/^s8|^s3/.test(P.cur())&&g++<200){const c=P.cur();
+    if(c==='aq:q:1'){ok(!$('#app .ft .b1,#app .ft .b0')&&fw().hidden&&!!back(),'вопрос без ответа: внизу только «Назад», кнопок «Далее» и «Вперёд» нет')}
+    if(c==='aq:q:7'){ // вернуться на три шага назад, пройти вперёд, поменять ответ
+      for(let k=0;k<3;k++)await click(back(),20);
+      ok(P.cur()==='aq:q:4'&&$('#app .op.on')?.dataset.v==='1'&&!fw().hidden&&P.st.pos==='aq:q:7','три шага назад: ответ на месте, появилась «Вперёд», место в анкете не потеряно');
+      await click(fw(),20);ok(P.cur()==='aq:q:5'&&$('#app .op.on')?.dataset.v==='1','«Вперёд» ведёт дальше, ответ не меняется');
+      $$('#app .op')[3].click();await wait(PICK);ok(P.cur()==='aq:q:6'&&P.st.ans[5]==='3'&&P.st.ans[6]==='1','другой вариант у пройденного вопроса: ответ заменён, перешли к следующему');
+      await click($('#app .hd .cl'),60);ok(P.cur()==='s3'&&/Вопрос 7 из 42/.test(all()),'«×» с пройденного вопроса: на главной самый дальний вопрос');
+      await click('Продолжить анкету',60);ok(P.cur()==='aq:q:7'&&fw().hidden,'«Продолжить анкету» → первый вопрос без ответа')}
+    if(c.startsWith('aq:q:')){n++;$$('#app .op')[1].click();await wait(40);if(n===1)ok(P.cur()===c&&$('#app .op.on')?.dataset.v==='1','выбранный вариант успевает подсветиться');await wait(PICK-40);continue}
     if(c==='aq:pb:8')ok(/Собрать портрет/.test($('#app .ft .b1').textContent),'последняя перебивка: «Собрать портрет»');await click($('#app .ft .b1'),12)}
-  ok(n===42&&P.cur()==='s8','анкета 42 вопроса → сборка портрета');
+  ok(n===42&&P.cur()==='s8'&&Object.keys(P.st.ans).length===42,'анкета 42 вопроса → сборка портрета');
   await wait(2300);ok(/готов/i.test(all()),'портрет готов');
   await click('Посмотреть портрет');ok(P.cur()==='s4b'&&/Портрет/.test(all())&&/Рост в холке/.test(all())&&/25 кг/.test(all()),'профиль обогатился: портрет, вес, рост');
   await click($('#app .hd .ic'));ok(P.cur()==='s3'&&!!$('#app .r-cur [data-r=rec]'),'назад из профиля → главная E ['+nav()+']');noFuture('главная E');
@@ -41,7 +56,8 @@ window.__flow=async function(){
   // рекомендация 1: в работу, галочки, «Помогла»
   await click('Посмотреть рекомендацию');ok(P.cur()==='rec'&&/Новая/.test($('#rc-chip').textContent),'рекомендация 1 «Новая»');
   $$('#app .r-it')[0].click();await wait(20);ok(/Отмечено 0 из 20/.test(all())&&!$('#app .r-it.on')&&/Проверьте/.test($('#app .r-it').textContent+all()),'в «Новой» пункты видны, но не отмечаются');
-  await click('Беру в работу');ok(/В работе/.test($('#rc-chip').textContent)&&!!$('#app [data-a=result]'),'взяли в работу');
+  ok(/Возьмите в работу/.test($('#rc-pn .cap').textContent)&&getComputedStyle($('#app .r-bx'),'::after').content!=='none','в «Новой» вместо боксов точки, над кнопкой подсказка «Возьмите в работу»');
+  await click('Беру в работу');ok(/В работе/.test($('#rc-chip').textContent)&&$('#app [data-a=result]').className==='b2'&&/Завершить рекомендацию/.test($('#rc-pn').textContent)&&/Отмечайте пункты/.test($('#rc-pn .cap').textContent),'взяли в работу: кнопка «Завершить рекомендацию» спокойная, пока отмечено не всё');
   $$('#app .r-it')[0].click();$$('#app .r-it')[1].click();$$('#app .r-it')[0].click();await wait(20);ok(/Отмечено 1 из 20/.test(all()),'в работе отметки ставятся и снимаются');
   await click($('#app .hd .ic'));await click('Открыть');ok(/Отмечено 1 из 20/.test(all()),'отметки сохраняются между экранами');
   ok(await result('helped','Убрали провода'),'результат «Помогла» сохранён');
@@ -52,6 +68,7 @@ window.__flow=async function(){
   // рекомендация 2: «Не подходит нам»
   await click('Посмотреть рекомендацию');await click($('#app [data-a=nofit]'),380);
   ok($('#app .r-rc.on')?.dataset.s==='notfit'&&/Это первая/.test(all()),'«Не подходит нам» → шторка с выбранным «Не подошла» и предупреждением о лимите');
+  ok($$('#app .r-rc').length===1&&!$('#app .r-bs .r-acc')&&$('#app .r-bs .ttl').textContent==='Не подходит нам','в этой шторке только «Не подошла»: остальных вариантов и критериев нет');
   setv($('#app #rs-cm'),'нет места');await click($('#app [data-a=save]'),900);ok(/Так бывает/.test(all())&&/передали ваш комментарий/.test(all()),'спокойное подтверждение с комментарием');
   await click('Открыть',80);ok(P.cur()==='rec'&&/Дозируйте стресс/.test(all()),'«Открыть» → рекомендация 3');
   // рекомендация 3: вторая «Не подошла» → лимит
@@ -63,7 +80,7 @@ window.__flow=async function(){
   await click($('#app .r-x'),80);ok(!$('#app .r-bs'),'шторка закрывается крестиком');
   // к отложенной вернуться нельзя, пока текущая в работе
   await click($('#app .hd .ic'));ok(!/Можно вернуться/.test(all()),'текущая в работе: «Можно вернуться» скрыто');
-  await click($('#app .r-pd.notfit'));ok(!!$('#rc-pn button[disabled]')&&/Сначала отметьте результат/.test(all()),'у отложенной кнопка неактивна');
+  await click($('#app .r-pd.notfit'));ok(!!$('#rc-pn button[disabled]')&&/Сначала завершите текущую/.test(all()),'у отложенной кнопка неактивна');
   await click($('#app .hd .ic'));await click('Открыть');ok(await result('partial'),'рекомендация 4 «Помогла частично»');await click('К плану',80);
   // выход 1: вернуться к отложенной
   await click($('#app .r-pd.notfit'));await click('Попробовать ещё раз');ok(/В работе/.test($('#rc-chip').textContent)&&!!$('#app [data-a=again]'),'вернули отложенную: «В работе», есть «Отложить снова»');

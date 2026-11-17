@@ -55,7 +55,8 @@ function go(r,o={}){
   if(r==='profile')r=st.profile==='done'?'s4b':'s4';
   if(r==='home')r='s3';
   if(!o.back&&cur!==r&&cur!=='s8'&&cur!=='s14'){stack.push(cur);try{history.pushState({n:stack.length},'')}catch(e){}}
-  cur=r;if(r.startsWith('aq:')){st.pos=r;anketa(r)}else({s1:s1,s2:s2,s3:s3,s4:s4,s4b:s4b,s5:s5,s8:s8,pl:plan,rec:rec,s14:s14,chat:chat,e6:e6})[r](o);
+  /* st.pos — самый дальний экран анкеты, до которого дошли: с него анкета продолжается с главной, даже если вышли, вернувшись назад */
+  cur=r;if(r.startsWith('aq:')){if(!st.pos||ord(r)>ord(st.pos))st.pos=r;anketa(r)}else({s1:s1,s2:s2,s3:s3,s4:s4,s4b:s4b,s5:s5,s8:s8,pl:plan,rec:rec,s14:s14,chat:chat,e6:e6})[r](o);
   paintPanel();
 }
 function s1(){mount('s1')}
@@ -117,6 +118,9 @@ function nextOf(r){const[,k,v]=r.split(':'),n=+v;
   if(k==='vv')return 'aq:pb:1';if(k==='pb')return n<8?`aq:in:${n+1}`:null;if(k==='in')return `aq:q:${START[n-2]}`;
   if(k==='q'){const i=secOf(n);return n<START[i]+SEC[i].q.length-1?`aq:q:${n+1}`:`aq:fr:${i+2}`}
   if(k==='fr')return `aq:pb:${n}`;return null}
+/* порядок экранов анкеты от «Введения» до последней перебивки */
+const ROUTE=[];{let r='aq:vv';while(r){ROUTE.push(r);r=nextOf(r)}}
+const ord=r=>ROUTE.indexOf(r);
 function ft(p,r,ok){
   const b=$('.ft .b2',p),n=$('.ft .b1,.ft .b0',p);
   if(b){b.removeAttribute('data-r');b.removeAttribute('href');b.setAttribute('role','button');b.tabIndex=0;b.addEventListener('click',e=>{e.preventDefault();const pr=prevOf(r);if(pr)go(pr)})}
@@ -130,6 +134,7 @@ function sbar(p){
   mn.addEventListener('scroll',upd,{passive:true});new ResizeObserver(upd).observe(mn);upd();
 }
 /* СЕРВЕР: PUT /survey/answers/{n}, PUT /survey/free/{section}, PUT /survey/position; на последней перебивке POST /survey/finish */
+const PICK=260; /* пауза после выбора варианта, мс: выбранный вариант успевает подсветиться перед переходом */
 function anketa(r){
   const[,k,v]=r.split(':'),n=+v;
   if(k==='vv')return vvForm(r);
@@ -146,11 +151,16 @@ function anketa(r){
     m.innerHTML=`<p class="st">Вопрос ${n} из 42 · ${s.t}</p><div class="pg" role="progressbar" aria-valuenow="${n}" aria-valuemin="0" aria-valuemax="42" aria-label="Прогресс анкеты"><i style="width: ${(n/42*100).toFixed(1)}%"></i></div>`+
       `<div class="qc plain" role="group" aria-labelledby="q${n}"><p class="q${q.length>110?' long':''}" id="q${n}">${q}</p><div class="ops" role="radiogroup" aria-labelledby="q${n}">`+
       ops.map(([c,o])=>`<label class="op${c==='X'?' x':''}" role="radio" tabindex="0" aria-checked="false" data-v="${c}"><span class="n" aria-hidden="true">${c}</span><span>${o}</span></label>`).join('')+'</div></div>';
-    const f=ft(p,r,!s.req||st.ans[n]!=null);
-    const paint=()=>{$$('.op',m).forEach(o=>{const on=o.dataset.v===st.ans[n];o.classList.toggle('on',on);o.setAttribute('aria-checked',on)});f.set(!s.req||st.ans[n]!=null)};
-    $$('.op',m).forEach(o=>{const pick=()=>{st.ans[n]=o.dataset.v;paint()};o.addEventListener('click',pick);
+    /* «Далее» на вопросе нет: нажатие на вариант сохраняет ответ и само ведёт к следующему экрану.
+       Если на вопрос уже отвечали (вернулись «Назад»), справа появляется «Вперёд» — пройти дальше, не меняя ответ;
+       нажатие на любой вариант, в том числе на уже выбранный, тоже сохраняет его и ведёт дальше */
+    const fw=ft(p,r,false).next;fw.className='b2 fw';fw.disabled=false;fw.textContent='Вперёд';fw.hidden=st.ans[n]==null;
+    fw.addEventListener('click',()=>go(nextOf(r)));
+    const paint=()=>{$$('.op',m).forEach(o=>{const on=o.dataset.v===st.ans[n];o.classList.toggle('on',on);o.setAttribute('aria-checked',on)})};
+    let t=0;
+    $$('.op',m).forEach(o=>{const pick=()=>{st.ans[n]=o.dataset.v;paint();clearTimeout(t);t=later(()=>go(nextOf(r)),PICK)};o.addEventListener('click',pick);
       o.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();pick()}})});
-    paint();f.next.addEventListener('click',()=>{if(f.next.disabled)return;go(nextOf(r))});sbar(p);return}
+    paint();sbar(p);return}
 }
 /* «Введение»: одна форма; вопрос о сроке в приюте — только если в профиле «Откуда собака» = «из приюта» (или не заполнено) */
 /* СЕРВЕР: PUT /survey/intake — ответы «Введения» */
@@ -176,11 +186,16 @@ function vvForm(r){
   function clr(el){el.classList.remove('miss');el.querySelector(':scope>.et')?.remove();$('.in.er,.cs.er',el)?.classList.remove('er')}
   function err(el,txt){clr(el);el.classList.add('miss');el.insertAdjacentHTML('beforeend',`<div class="et" role="alert">${ICON.warn}<span>${txt}</span></div>`);fitErr(el)}
   const fb=ft(p,r,true);
+  /* все пункты «Введения» обязательные: числа больше нуля, в каждом вопросе выбран вариант, развёрнутый ответ не пустой */
   fb.next.addEventListener('click',()=>{
-    const bad=[];const v=ppl.value.trim();
-    if(!v||!(+v>=1)){err(ppl.closest('.fl'),'Укажите число');bad.push(ppl.closest('.fl'))}
-    const br=$$('fieldset',f).find(fs=>/Метис/.test($('legend',fs).textContent));
-    if(br&&!$('input:checked',br)){err(br,'Выберите вариант');bad.push(br)}
+    const bad=[];
+    [...f.children].forEach(el=>{
+      if(el.matches('fieldset')){if(!$('input:checked',el)){err(el,'Выберите вариант');bad.push(el)}return}
+      if(!el.matches('.fl'))return;
+      const i=$('input.in,textarea',el),v=i.value.trim();
+      if(i.matches('textarea')){if(!v){err(el,'Напишите ответ');bad.push(el)}return}
+      if(!(parseFloat(v.replace(',','.'))>0)){err(el,'Укажите число');bad.push(el)}
+    });
     if(bad.length){reveal(bad[0]);return}
     go(nextOf(r));
   });
@@ -405,7 +420,7 @@ function homeCard(){
 }
 function paintHome(k,p){
   const nm=$('.r-day .big span',p);
-  if(nm&&k!=='a'&&k!=='a2'&&st.draft.name){nm.textContent=st.draft.name;nm.style.display='block';nm.style.maxWidth='210px';nm.style.overflow='hidden';fitBig(nm,48)}
+  if(nm&&k!=='a'&&k!=='a2'&&st.draft.name){nm.textContent=st.draft.name;nm.style.display='block';nm.style.overflow='hidden';fitBig(nm,Math.min(48,Math.round($('.r-day',p).clientHeight*.4)))}
   if(k==='c'){const b=$('.r-cur .r-pr b',p),bar=$('.r-cur .r-bar i',p);const m=(st.pos||'').match(/^aq:q:(\d+)/);
     if(b)b.textContent=where();if(bar)bar.style.width=(m?(+m[1]/42*100):({vv:0,pb:1,in:1,fr:1}[(st.pos||'aq:vv').split(':')[1]]||0)*((+(st.pos||'').split(':')[2]||1)/8*100)).toFixed(1)+'%'}
   if(k==='e'){const c=$('.r-cur',p);if(c)c.outerHTML=homeCard()}
@@ -437,14 +452,17 @@ function plan(o){
 /* S12 — рекомендация */
 function panelHTML(i,fail){
   const P=st.plan,R=P.recs[i],s=R.s,er=fail?`<div class="r-err s" role="alert"><span class="tt">${IC('warn',16)}<span>Не получилось сохранить. Попробуйте ещё раз</span></span></div>`:'';
-  if(s==='new')return P.used>=2?`<div class="r-pn">${er}<div class="r-hint">${IC('info',20)}<span>${LIMIT}</span></div><button class="b1" type="button" data-a="take">Беру в работу</button></div>`
-    :`<div class="r-pn">${er}<button class="b1" type="button" data-a="take">Беру в работу</button><a class="lk" href="#" data-a="nofit">Не подходит нам</a></div>`;
-  if(s==='work'){const all=doneOf(i)===totalOf(i)?`<div class="r-ok">${IC('check',18)}Всё отмечено. Отметить результат?</div>`:'';
-    return `<div class="r-pn">${all}<button class="b1" type="button" data-a="result">Отметить результат</button>${R.ret?'<a class="lk" href="#" data-a="again">Отложить снова</a>':''}</div>`}
+  /* над кнопкой всегда подпись — что делать сейчас. «Новая»: сначала взять в работу. «В работе»: отмечать пункты;
+     кнопка завершения спокойная, пока отмечено не всё, и становится главной, когда отмечены все пункты */
+  const take='<p class="cap">Возьмите в работу, чтобы отмечать пункты</p><button class="b1" type="button" data-a="take">Беру в работу</button>';
+  if(s==='new')return P.used>=2?`<div class="r-pn">${er}<div class="r-hint">${IC('info',20)}<span>${LIMIT}</span></div>${take}</div>`
+    :`<div class="r-pn">${er}${take}<a class="lk" href="#" data-a="nofit">Не подходит нам</a></div>`;
+  if(s==='work'){const all=doneOf(i)===totalOf(i);
+    return `<div class="r-pn">${all?`<div class="r-ok">${IC('check',18)}Всё отмечено. Можно завершать</div>`:'<p class="cap">Отмечайте пункты по мере выполнения</p>'}<button class="${all?'b1':'b2'}" type="button" data-a="result">Завершить рекомендацию</button>${R.ret?'<a class="lk" href="#" data-a="again">Отложить снова</a>':''}</div>`}
   if(s==='helped'||s==='partial')return `<div class="r-pn"><div class="res"><span>Ваш результат:</span>${chip(s)}<a href="#" data-a="result">Изменить</a></div></div>`;
   const head='<p class="cap" style="font-size:15px;color:#1b2440;font-weight:500">Вы отложили эту рекомендацию</p>';
   return canReturn()?`<div class="r-pn">${er}${head}<button class="b1" type="button" data-a="retry">Попробовать ещё раз</button></div>`
-    :`<div class="r-pn">${head}<button class="b0" type="button" disabled>Попробовать ещё раз</button><p class="cap">Сначала отметьте результат по текущей рекомендации</p></div>`;
+    :`<div class="r-pn">${head}<button class="b0" type="button" disabled>Попробовать ещё раз</button><p class="cap">Сначала завершите текущую рекомендацию</p></div>`;
 }
 function groupHTML(i,gi){
   const [t,items,note]=RC[i].g[gi],R=st.plan.recs[i],open=!!R.open[gi],n=items.filter((x,k)=>R.ck[gi+'.'+k]).length;
@@ -458,14 +476,18 @@ function rec(o){
   const r=RC[i],R=P.recs[i],m=totalOf(i);
   const top=`<div class="r-top" style="--c:${r.c}"><div class="hd"><button class="ic" type="button" aria-label="Назад" data-r="${st.recFrom||'plan'}">${IC('back',22)}</button><span class="t"></span></div><div class="pic"><img class="dg" src="${r.ill}" alt=""></div><h1 class="t">${r.t}</h1><div class="r-row" id="rc-chip">${chip(R.s)}</div><div style="margin-top:14px" id="rc-pr">${progress(doneOf(i),m)}</div></div>`;
   const why=`<section class="r-b"><h2 class="r-bt"><span class="r-ti s wh">${IC('up',18)}</span>Почему это важно</h2><div class="r-clamp" id="rc-why" style="display:-webkit-box;flex-direction:column;gap:10px">${r.why.map(x=>`<p>${x}</p>`).join('')}</div><a class="r-more" href="#" data-a="more">Читать дальше</a></section>`;
-  const todo='<h2 class="r-h2" style="margin-top:4px">Что сделать</h2>'+(r.intro?`<p class="r-tx" style="margin-top:-8px;color:#48506e">${r.intro}</p>`:'');
+  const todo='<h2 class="r-h2" id="rc-todo" style="margin-top:4px">Что сделать</h2>'+(r.intro?`<p class="r-tx" style="margin-top:-8px;color:#48506e">${r.intro}</p>`:'');
   const terms=r.terms.length?`<section class="r-b sky"><h2 class="r-bt"><span class="r-ti s wh">${IC('clock',18)}</span>Сроки</h2>${r.terms.map(x=>`<p>${x}</p>`).join('')}</section>`:'';
   const crit=`<section class="r-b"><h2 class="r-bt"><span class="r-ti s wh">${IC('target',18)}</span>Как понять, что получилось</h2><ul class="r-ul">${r.crit.map(x=>`<li>${IC('check',18)}<span>${x}</span></li>`).join('')}</ul></section>`;
   const p=mountH(`<div class="ph">\n<div class="r-scr"><div>${top}<div class="r-sheet"><span class="r-hdl"></span>${why}${todo}<div id="rc-g" style="display:flex;flex-direction:column;gap:16px">${r.g.map((g,gi)=>groupHTML(i,gi)).join('')}</div>${terms}${crit}</div></div></div>\n<div id="rc-pn">${panelHTML(i)}</div>\n</div>`);
   const sc=$('.r-scr',p);if(o&&o.top)sc.scrollTop=o.top;
   const locked=()=>R.s==='new'||R.s==='notfit';
   const lock=()=>{const l=locked();p.classList.toggle('r-lock',l);p.querySelectorAll('.r-bx').forEach(b=>{b.setAttribute('aria-disabled',l);b.tabIndex=l?-1:0})};
-  const nudge=()=>{const b=$('#rc-pn .b1',p);if(!b)return;b.classList.remove('r-nudge');void b.offsetWidth;b.classList.add('r-nudge')};
+  const nudge=()=>{p.querySelectorAll('#rc-pn .b1,#rc-pn .cap').forEach(b=>{b.classList.remove('r-nudge');void b.offsetWidth;b.classList.add('r-nudge')})};
+  /* взяли в работу: боксы появляются на глазах, а если чек-листа на экране не видно — экран прокручивается к «Что сделать» */
+  const unlock=()=>{p.classList.add('r-unl');later(()=>p.classList.remove('r-unl'),400);
+    const h=p.querySelector('#rc-todo').getBoundingClientRect(),b=sc.getBoundingClientRect(),pn=p.querySelector('#rc-pn').getBoundingClientRect();
+    if(h.top<b.top||h.top>pn.top-140)sc.scrollTo({top:sc.scrollTop+h.top-b.top-16,behavior:'smooth'})};
   const repaint=()=>{$('#rc-chip',p).innerHTML=chip(R.s);$('#rc-pn',p).innerHTML=panelHTML(i);lock()};
   const count=()=>{const n=doneOf(i);$('#rc-pr b',p).textContent=`Отмечено ${n} из ${m}`;$('#rc-pr .r-bar i',p).style.width=(n/m*100).toFixed(1)+'%';$('#rc-pr .r-bar',p).setAttribute('aria-valuenow',n)};
   const toggle=lab=>{const k=lab.dataset.k,gi=+k.split('.')[0],on=!R.ck[k];if(on)R.ck[k]=1;else delete R.ck[k];
@@ -477,10 +499,10 @@ function rec(o){
     const gh=e.target.closest('.r-gh');if(gh){const sec=gh.closest('.r-g'),gi=+sec.dataset.g;R.open[gi]=!R.open[gi];sec.outerHTML=groupHTML(i,gi);lock();return}
     const a=e.target.closest('[data-a]');if(!a)return;e.preventDefault();const act=a.dataset.a;
     if(act==='more'){const w=$('#rc-why',p),cl=w.classList.toggle('r-clamp');w.style.display=cl?'-webkit-box':'flex';a.textContent=cl?'Читать дальше':'Свернуть'}
-    if(act==='take'){R.s='work';repaint()}
-    if(act==='nofit')resSheet(i,'notfit');
+    if(act==='take'){R.s='work';repaint();unlock()}
+    if(act==='nofit')resSheet(i,'notfit',true);
     if(act==='result')resSheet(i,RES.includes(R.s)?R.s:null);
-    if(act==='retry'){R.s='work';R.ret=true;repaint()}
+    if(act==='retry'){R.s='work';R.ret=true;repaint();unlock()}
     if(act==='again'){R.s='notfit';R.ret=false;go('plan')}
   });
   p.addEventListener('keydown',e=>{if(e.key!==' '&&e.key!=='Enter')return;const t=e.target.closest('.r-bx,.r-gh');if(t){e.preventDefault();t.click()}});
@@ -502,21 +524,24 @@ function dragClose(s,done){ /* шторка тянется за «ручку» �
   const up=e=>{if(y0===null)return;const d=e.clientY-y0;y0=null;s.style.transition='';if(d>90)done();else s.style.transform=''};
   s.addEventListener('pointerup',up);s.addEventListener('pointercancel',up);
 }
-function resSheet(i,pre){
+/* only — шторку открыли ссылкой «Не подходит нам» у новой рекомендации: её ещё не пробовали,
+   поэтому в шторке только вариант «Не подошла» — без остальных вариантов и без критериев */
+function resSheet(i,pre,only){
   const p=$('.ph'),P=st.plan,R=P.recs[i],r=RC[i];closeSheet();
   const S={sel:pre||null,cm:RES.includes(R.s)?R.cm:'',crit:false,busy:false};
   const lim=P.used>=2&&R.s!=='notfit';if(lim&&S.sel==='notfit')S.sel=null;
-  p.insertAdjacentHTML('beforeend','<div class="r-ov"></div><div class="r-bs" role="dialog" aria-modal="true" aria-label="Как прошло?"></div>');
+  only=!!only&&!lim;const ttl=only?'Не подходит нам':'Как прошло?';
+  p.insertAdjacentHTML('beforeend',`<div class="r-ov"></div><div class="r-bs" role="dialog" aria-modal="true" aria-label="${ttl}"></div>`);
   const ov=$('.r-ov',p),s=$('.r-bs',p);
   const draw=()=>{
-    const cards=RES.map((k,q)=>{const dis=lim&&k==='notfit',on=S.sel===k;
+    const cards=RES.map((k,q)=>{if(only&&k!=='notfit')return '';const dis=lim&&k==='notfit',on=S.sel===k;
       let h=`<label class="r-rc${on?' on':''}${dis?' dis':''}" data-s="${k}" role="radio" tabindex="${dis?-1:0}" aria-checked="${on}" aria-disabled="${dis}"><span class="r-ti ${['lime','lil','sand'][q]}">${IC(STAT[k][1],22)}</span><span class="tt"><b>${STAT[k][0]}</b><span class="d">${RSUB[k]}</span></span><span class="ck">${on?IC('check',16):''}</span></label>`;
       if(dis)h+=`<div class="r-hint">${IC('info',20)}<span>${LIMIT}</span></div>`;
       else if(k==='notfit'&&on&&R.s!=='notfit')h+=`<div class="r-hint">${IC('info',20)}<span>${P.used===0?'Отложить можно две рекомендации за всё время. Это первая':'Это вторая отложенная рекомендация. Больше откладывать будет нельзя'}</span></div>`;
       return h}).join('');
     const nf=S.sel==='notfit';
-    s.innerHTML=`<span class="r-hdl"></span><button class="r-x" type="button" aria-label="Закрыть">${IC('close',20)}</button><div style="padding-right:44px"><p class="ttl">Как прошло?</p><p class="r-sub" style="margin-top:4px;font-size:14px">${r.t}</p></div>`+
-      `<div class="r-acc${S.crit?' open':''}"><div class="hh" role="button" tabindex="0" aria-expanded="${S.crit}">${IC('target',18)}Как понять, что получилось<span class="cv">${IC('chev',18)}</span></div>${S.crit?'<ul class="r-ul">'+r.crit.map(x=>`<li>${IC('check',16)}<span>${x}</span></li>`).join('')+'</ul>':''}</div>`+
+    s.innerHTML=`<span class="r-hdl"></span><button class="r-x" type="button" aria-label="Закрыть">${IC('close',20)}</button><div style="padding-right:44px"><p class="ttl">${ttl}</p><p class="r-sub" style="margin-top:4px;font-size:14px">${r.t}</p></div>`+
+      (only?'':`<div class="r-acc${S.crit?' open':''}"><div class="hh" role="button" tabindex="0" aria-expanded="${S.crit}">${IC('target',18)}Как понять, что получилось<span class="cv">${IC('chev',18)}</span></div>${S.crit?'<ul class="r-ul">'+r.crit.map(x=>`<li>${IC('check',16)}<span>${x}</span></li>`).join('')+'</ul>':''}</div>`)+
       `<div role="radiogroup" style="display:flex;flex-direction:column;gap:12px;flex:none">${cards}</div>`+
       `<div class="r-fl"><label for="rs-cm">${nf?'Что не подошло?':'Что получилось и что нет'}</label><textarea id="rs-cm" maxlength="500"${S.busy?' disabled':''}>${escH(S.cm)}</textarea>${nf?'<p class="r-sub">Комментарий увидит команда Хвостуна</p>':''}</div>`+
       (S.busy?`<button class="b1" type="button" aria-busy="true" disabled>${IC('spin',20)}Сохранить</button>`:S.sel?'<button class="b1" type="button" data-a="save">Сохранить</button>':'<button class="b0" type="button" disabled>Сохранить</button>');
@@ -591,11 +616,16 @@ function viewport(){
   const kb=base-v.height>120;
   app.classList.toggle('kb',kb);
   const cs=getComputedStyle(document.documentElement),pad=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
+  /* только высота: flex у #app не трогаем — у него container-type:size, и с flex:none его ширина стала бы нулевой (пустой белый экран) */
   app.style.height=kb?(v.height-pad)+'px':'';
-  app.style.flex=kb?'none':'';
   app.style.transform=kb&&v.offsetTop?`translateY(${v.offsetTop}px)`:'';
-  if(kb)window.scrollTo(0,0);
+  /* iPhone при открытии клавиатуры прокручивает страницу и может не вернуть её после закрытия */
+  if(window.scrollY||window.scrollX)window.scrollTo(0,0);
 }
+/* масштабирование страницы выключено: в viewport стоит maximum-scale=1, user-scalable=no, у html — touch-action: pan-x pan-y;
+   Safari на iPhone эти настройки соблюдает не всегда, поэтому жест двумя пальцами отменяется и здесь */
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
 window.visualViewport?.addEventListener('resize',viewport);
 window.visualViewport?.addEventListener('scroll',viewport);
 window.addEventListener('orientationchange',()=>{base=0;setTimeout(viewport,300)});

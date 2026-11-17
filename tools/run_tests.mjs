@@ -25,6 +25,23 @@ if (what !== 'matrix') {
   const lines = log.split('\n'), fail = lines.filter(l => !l.startsWith('ok'));
   console.log(`Сценарий: шагов ${lines.length}, не прошло ${fail.length}`);
   fail.forEach(l => console.log('  ' + l)); bad += fail.length;
+  // клавиатура как на телефоне: видимая область становится ниже, экран должен остаться на месте и ужаться по высоте
+  // (матрица ниже задаёт размеры экрана сама и настоящую функцию viewport не проверяет)
+  for (const [w, h, k] of [[390, 844, 510], [360, 615, 330]]) {
+    await c.send('Emulation.setDeviceMetricsOverride', {width: w, height: h, deviceScaleFactor: 2, mobile: true});
+    await c.ev('__p.device("m",false,false);__p.preset(1);new Promise(r=>setTimeout(()=>r(1),300))');
+    await c.send('Emulation.setDeviceMetricsOverride', {width: w, height: k, deviceScaleFactor: 2, mobile: true});
+    const r = await c.ev(`new Promise(r=>setTimeout(()=>{__p.viewport();const a=document.getElementById('app'),b=a.getBoundingClientRect(),f=document.querySelector('#app input.in').getBoundingClientRect();
+      r({kb:a.classList.contains('kb'),w:Math.round(b.width),h:Math.round(b.height),field:f.width>100&&f.bottom<=b.bottom+1})},300))`);
+    const ok = r.kb && r.w === w && r.h === k && r.field;
+    console.log(`Клавиатура на ${w} × ${h}: ${ok ? 'экран на месте, поле видно' : 'ОШИБКА ' + JSON.stringify(r)}`); if (!ok) bad++;
+    await c.send('Emulation.setDeviceMetricsOverride', {width: w, height: h, deviceScaleFactor: 2, mobile: true});
+    await c.ev('new Promise(r=>setTimeout(()=>{__p.viewport();r(1)},200))');
+  }
+  const zoom = await c.ev(`document.querySelector('meta[name=viewport]').content`);
+  if (!/user-scalable=no/.test(zoom) || !/maximum-scale=1/.test(zoom)) { console.log('  !! масштабирование страницы не выключено'); bad++ }
+  await c.send('Emulation.setDeviceMetricsOverride', {width: 1500, height: 1100, deviceScaleFactor: 1, mobile: false});
+  await c.ev('__p.device("m",false,true);new Promise(r=>setTimeout(()=>r(1),200))');
 }
 if (what !== 'flow') {
   for (const [opt, title] of [[{}, 'обычный шрифт'], [{kb: true}, 'с клавиатурой'], [{font: 1.3}, 'шрифт × 1,3']]) {

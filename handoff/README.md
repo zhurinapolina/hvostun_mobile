@@ -80,7 +80,7 @@
 | [`s5-survey-start.html`](screens/s5-survey-start.html) | S5 · Анкета: вход | `s5` |
 | [`s7-intro-form.html`](screens/s7-intro-form.html) | S7 · Раздел 1 «Введение»: форма (собака из приюта) | `aq:vv` |
 | [`s7-intro-form-not-shelter.html`](screens/s7-intro-form-not-shelter.html) | S7 · «Введение»: собака не из приюта — без вопроса о сроке в приюте | `aq:vv` |
-| [`s7-intro-form-errors.html`](screens/s7-intro-form-errors.html) | S7 · «Введение»: не заполнены обязательные поля | `aq:vv` |
+| [`s7-intro-form-errors.html`](screens/s7-intro-form-errors.html) | S7 · «Введение»: ничего не заполнено — ошибка у каждого пункта | `aq:vv` |
 | [`s7-intro-form-filled.html`](screens/s7-intro-form-filled.html) | S7 · «Введение»: заполнено | `aq:vv` |
 | [`s7-break-1.html`](screens/s7-break-1.html) | S7 · Перебивка после раздела 1 | `aq:pb:1` |
 | [`s7-break-2.html`](screens/s7-break-2.html) | S7 · Перебивка после раздела 2 | `aq:pb:2` |
@@ -97,11 +97,10 @@
 | [`s7-section-6-intro.html`](screens/s7-section-6-intro.html) | S7 · Вступление раздела 6 | `aq:in:6` |
 | [`s7-section-7-intro.html`](screens/s7-section-7-intro.html) | S7 · Вступление раздела 7 | `aq:in:7` |
 | [`s7-section-8-intro.html`](screens/s7-section-8-intro.html) | S7 · Вступление раздела 8 | `aq:in:8` |
-| [`s7-question.html`](screens/s7-question.html) | S7 · Вопрос: ответ не выбран, «Далее» неактивна | `aq:q:1` |
-| [`s7-question-selected.html`](screens/s7-question-selected.html) | S7 · Вопрос: ответ выбран | `aq:q:2` |
+| [`s7-question.html`](screens/s7-question.html) | S7 · Вопрос: ответа ещё нет — внизу только «Назад», нажатие на вариант ведёт дальше | `aq:q:1` |
+| [`s7-question-selected.html`](screens/s7-question-selected.html) | S7 · Вопрос, на который уже отвечали: ответ подсвечен, справа «Вперёд» | `aq:q:2` |
 | [`s7-question-long-x.html`](screens/s7-question-long-x.html) | S7 · Длинный вопрос, выбрано «Не наблюдалось» | `aq:q:16` |
 | [`s7-question-frequency.html`](screens/s7-question-frequency.html) | S7 · Вопрос со шкалой частоты | `aq:q:22` |
-| [`s7-question-optional.html`](screens/s7-question-optional.html) | S7 · Необязательный вопрос («Дрессируемость»): «Далее» активна | `aq:q:27` |
 | [`s7-free-answer.html`](screens/s7-free-answer.html) | S7 · Свободный ответ в конце раздела | `aq:fr:2` |
 | [`s7-free-answer-filled.html`](screens/s7-free-answer-filled.html) | S7 · Свободный ответ: заполнено | `aq:fr:3` |
 
@@ -129,7 +128,7 @@
 
 | Эталон | Экран и состояние | Маршрут в прототипе |
 |---|---|---|
-| [`s12-rec-new.html`](screens/s12-rec-new.html) | S12 · Рекомендация «Новая»: пункты видны, отметить нельзя | `rec` |
+| [`s12-rec-new.html`](screens/s12-rec-new.html) | S12 · Рекомендация «Новая»: пункты списком с точками, отметить нельзя | `rec` |
 | [`s12-rec-new-limit.html`](screens/s12-rec-new-limit.html) | S12 · «Новая», лимит «Не подошла» исчерпан | `rec` |
 | [`s12-rec-work.html`](screens/s12-rec-work.html) | S12 · Рекомендация «В работе»: часть пунктов отмечена | `rec` |
 | [`s12-rec-work-why-open.html`](screens/s12-rec-work-why-open.html) | S12 · «В работе»: «Почему это важно» раскрыто | `rec` |
@@ -145,6 +144,7 @@
 
 | Эталон | Экран и состояние | Маршрут в прототипе |
 |---|---|---|
+| [`s13-result-only-notfit.html`](screens/s13-result-only-notfit.html) | S13 · «Не подходит нам» у новой рекомендации: только вариант «Не подошла» | `rec` |
 | [`s13-result.html`](screens/s13-result.html) | S13 · Результат: ничего не выбрано, «Сохранить» неактивна | `rec` |
 | [`s13-result-helped.html`](screens/s13-result-helped.html) | S13 · Результат: выбрано «Помогла», критерии раскрыты | `rec` |
 | [`s13-result-notfit.html`](screens/s13-result-notfit.html) | S13 · Результат: «Не подошла», первая отложенная | `rec` |
@@ -252,21 +252,6 @@
 | [`s14-final--320x568.html`](screens/s14-final--320x568.html) | S14 · Маршрут пройден · маленький телефон 320 × 568 | `s14` |
 | [`s14-final--667x375.html`](screens/s14-final--667x375.html) | S14 · Маршрут пройден · горизонтально 667 × 375 | `s14` |
 
-Экраны анкеты, которых нет в списке (остальные вопросы, вступления и свободные ответы), строятся из тех же шаблонов и данных `cbarq-questions.json` — так же, как в `app.js` (функция `anketa`). Рекомендации 2–5 строятся из того же шаблона, что первая, и текстов `recommendations.json`.
-
-Состояния загрузки и ошибок загрузки для профиля, плана, рекомендации и шторки результата есть только на досках (`mockups/V-M-S4b-portret`, `V-M-S9-plan`, `V-M-S12-1`, `V-M-S13-S14`): прототип не ходит на сервер и их не показывает. Разметку и стили этих состояний брать с досок.
-
-Экраны анкеты, которых нет в списке (остальные вопросы, вступления и свободные ответы), строятся из тех же шаблонов и данных `cbarq-questions.json` — так же, как в `app.js` (функция `anketa`). Рекомендации 2–5 строятся из того же шаблона, что первая, и текстов `recommendations.json`.
-
-Состояния загрузки и ошибок загрузки для профиля, плана, рекомендации и шторки результата есть только на досках (`mockups/V-M-S4b-portret`, `V-M-S9-plan`, `V-M-S12-1`, `V-M-S13-S14`): прототип не ходит на сервер и их не показывает. Разметку и стили этих состояний брать с досок.
-
-Экраны анкеты, которых нет в списке (остальные вопросы, вступления и свободные ответы), строятся из тех же шаблонов и данных `cbarq-questions.json` — так же, как в `app.js` (функция `anketa`). Рекомендации 2–5 строятся из того же шаблона, что первая, и текстов `recommendations.json`.
-
-Состояния загрузки и ошибок загрузки для профиля, плана, рекомендации и шторки результата есть только на досках (`mockups/V-M-S4b-portret`, `V-M-S9-plan`, `V-M-S12-1`, `V-M-S13-S14`): прототип не ходит на сервер и их не показывает. Разметку и стили этих состояний брать с досок.
-
-Экраны анкеты, которых нет в списке (остальные вопросы, вступления и свободные ответы), строятся из тех же шаблонов и данных `cbarq-questions.json` — так же, как в `app.js` (функция `anketa`). Рекомендации 2–5 строятся из того же шаблона, что первая, и текстов `recommendations.json`.
-
-Состояния загрузки и ошибок загрузки для профиля, плана, рекомендации и шторки результата есть только на досках (`mockups/V-M-S4b-portret`, `V-M-S9-plan`, `V-M-S12-1`, `V-M-S13-S14`): прототип не ходит на сервер и их не показывает. Разметку и стили этих состояний брать с досок.
 
 ## Как пересобрать эталоны
 

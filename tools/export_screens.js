@@ -51,15 +51,14 @@ const LIST=[
  ['s5-survey-start','S5 · Анкета: вход','Анкета',()=>show('s5',base({profile:'done',draft:filled()}))],
  ['s7-intro-form','S7 · Раздел 1 «Введение»: форма (собака из приюта)','Анкета',aq('aq:vv')],
  ['s7-intro-form-not-shelter','S7 · «Введение»: собака не из приюта — без вопроса о сроке в приюте','Анкета',aq('aq:vv',{draft:{...filled(),from:'от заводчика'}})],
- ['s7-intro-form-errors','S7 · «Введение»: не заполнены обязательные поля','Анкета',async()=>{await aq('aq:vv')();await click('#app .ft .b1')}],
+ ['s7-intro-form-errors','S7 · «Введение»: ничего не заполнено — ошибка у каждого пункта','Анкета',async()=>{await aq('aq:vv')();await click('#app .ft .b1')}],
  ['s7-intro-form-filled','S7 · «Введение»: заполнено','Анкета',aq('aq:vv',{vv:{t0:'3',f0:'нет',f1:'да',f2:'~ 1 год',f3:'метис',t1:'18,5',t2:'52',t3:'Жил в приюте с другими собаками, гуляли раз в день',f4:'нет'}})],
  ...[1,2,3,4,5,6,7,8].map(n=>[`s7-break-${n}`,`S7 · Перебивка после раздела ${n}`,'Анкета',aq(`aq:pb:${n}`)]),
  ...[2,3,4,5,6,7,8].map(n=>[`s7-section-${n}-intro`,`S7 · Вступление раздела ${n}`,'Анкета',aq(`aq:in:${n}`)]),
- ['s7-question','S7 · Вопрос: ответ не выбран, «Далее» неактивна','Анкета',aq('aq:q:1')],
- ['s7-question-selected','S7 · Вопрос: ответ выбран','Анкета',aq('aq:q:2',{ans:{2:'3'}})],
+ ['s7-question','S7 · Вопрос: ответа ещё нет — внизу только «Назад», нажатие на вариант ведёт дальше','Анкета',aq('aq:q:1')],
+ ['s7-question-selected','S7 · Вопрос, на который уже отвечали: ответ подсвечен, справа «Вперёд»','Анкета',aq('aq:q:2',{ans:{2:'3'}})],
  ['s7-question-long-x','S7 · Длинный вопрос, выбрано «Не наблюдалось»','Анкета',aq('aq:q:16',{ans:{16:'X'}})],
  ['s7-question-frequency','S7 · Вопрос со шкалой частоты','Анкета',aq('aq:q:22')],
- ['s7-question-optional','S7 · Необязательный вопрос («Дрессируемость»): «Далее» активна','Анкета',aq('aq:q:27')],
  ['s7-free-answer','S7 · Свободный ответ в конце раздела','Анкета',aq('aq:fr:2')],
  ['s7-free-answer-filled','S7 · Свободный ответ: заполнено','Анкета',aq('aq:fr:3',{free:{3:'Лает на курьеров и на звонок в дверь, успокаивается за пару минут.'}})],
  ['s8-building','S8 · Портрет собирается','Портрет',()=>show('s8',pv(null))],
@@ -72,7 +71,7 @@ const LIST=[
  ['s9-plan-returned','S9 · План: вернули отложенную, следующая ждёт','План',()=>show('pl',pv('ret'))],
  ['s9-plan-done','S9 · План: маршрут пройден','План',()=>show('pl',pv('done'))],
  ['s9-plan-done-returned','S9 · План: маршрут пройден, вернулись к отложенной','План',()=>{const s=pv('done');s.plan.recs[1].s='work';s.plan.recs[1].ret=true;return show('pl',s)}],
- ['s12-rec-new','S12 · Рекомендация «Новая»: пункты видны, отметить нельзя','Рекомендация',recAt('new',0)],
+ ['s12-rec-new','S12 · Рекомендация «Новая»: пункты списком с точками, отметить нельзя','Рекомендация',recAt('new',0)],
  ['s12-rec-new-limit','S12 · «Новая», лимит «Не подошла» исчерпан','Рекомендация',recAt('limit',2)],
  ['s12-rec-work','S12 · Рекомендация «В работе»: часть пунктов отмечена','Рекомендация',recAt('work',0)],
  ['s12-rec-work-why-open','S12 · «В работе»: «Почему это важно» раскрыто','Рекомендация',async()=>{await recAt('work',0)();await tap('[data-a=more]')}],
@@ -83,6 +82,7 @@ const LIST=[
  ['s12-rec-notfit-blocked','S12 · Отложенная: вернуть нельзя, пока текущая в работе','Рекомендация',recAt('mid',1)],
  ['s12-rec-returned','S12 · Возвращённая в работу: «Отложить снова»','Рекомендация',recAt('ret',0)],
  ['s12-rec-last','S12 · Последняя рекомендация маршрута','Рекомендация',recAt('last',4)],
+ ['s13-result-only-notfit','S13 · «Не подходит нам» у новой рекомендации: только вариант «Не подошла»','Результат',async()=>{await recAt('new',0)();await tap('[data-a=nofit]')}],
  ['s13-result','S13 · Результат: ничего не выбрано, «Сохранить» неактивна','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]')}],
  ['s13-result-helped','S13 · Результат: выбрано «Помогла», критерии раскрыты','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]');await tap('.r-bs .hh');await tap('.r-rc[data-s=helped]')}],
  ['s13-result-notfit','S13 · Результат: «Не подошла», первая отложенная','Результат',async()=>{await recAt('work',0)();await tap('[data-a=result]');await tap('.r-rc[data-s=notfit]')}],
@@ -105,7 +105,7 @@ function snapshot(){
   a.forEach((el,i)=>{const c=b[i];if(el.type==='checkbox'||el.type==='radio'){el.checked?c.setAttribute('checked',''):c.removeAttribute('checked')}
     else if(el.tagName==='TEXTAREA')c.textContent=el.value;else c.setAttribute('value',el.value)});
   $$('*',ph).forEach(e=>{for(const k of [...e.attributes].map(x=>x.name))if(/^data-(r|c|x|i|k|d|m|a|g|s|rec|fit)$/.test(k))e.removeAttribute(k)});
-  $$('.r-anim,.r-nudge',ph).forEach(e=>e.classList.remove('r-anim','r-nudge'));
+  $$('.r-anim,.r-nudge',ph).forEach(e=>e.classList.remove('r-anim','r-nudge'));ph.classList.remove('r-unl');
   $$('.dp-d.td',ph).forEach(e=>e.classList.remove('td')); /* отметка «сегодня» в календаре зависит от дня выгрузки — в эталон не идёт */
   return ph.outerHTML;
 }

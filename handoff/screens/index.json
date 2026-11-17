@@ -193,7 +193,7 @@
  },
  {
   "id": "s7-intro-form-errors",
-  "title": "S7 · «Введение»: не заполнены обязательные поля",
+  "title": "S7 · «Введение»: ничего не заполнено — ошибка у каждого пункта",
   "group": "Анкета",
   "size": "390 × 844",
   "file": "screens/s7-intro-form-errors.html",
@@ -329,7 +329,7 @@
  },
  {
   "id": "s7-question",
-  "title": "S7 · Вопрос: ответ не выбран, «Далее» неактивна",
+  "title": "S7 · Вопрос: ответа ещё нет — внизу только «Назад», нажатие на вариант ведёт дальше",
   "group": "Анкета",
   "size": "390 × 844",
   "file": "screens/s7-question.html",
@@ -337,7 +337,7 @@
  },
  {
   "id": "s7-question-selected",
-  "title": "S7 · Вопрос: ответ выбран",
+  "title": "S7 · Вопрос, на который уже отвечали: ответ подсвечен, справа «Вперёд»",
   "group": "Анкета",
   "size": "390 × 844",
   "file": "screens/s7-question-selected.html",
@@ -358,14 +358,6 @@
   "size": "390 × 844",
   "file": "screens/s7-question-frequency.html",
   "route": "aq:q:22"
- },
- {
-  "id": "s7-question-optional",
-  "title": "S7 · Необязательный вопрос («Дрессируемость»): «Далее» активна",
-  "group": "Анкета",
-  "size": "390 × 844",
-  "file": "screens/s7-question-optional.html",
-  "route": "aq:q:27"
  },
  {
   "id": "s7-free-answer",
@@ -465,7 +457,7 @@
  },
  {
   "id": "s12-rec-new",
-  "title": "S12 · Рекомендация «Новая»: пункты видны, отметить нельзя",
+  "title": "S12 · Рекомендация «Новая»: пункты списком с точками, отметить нельзя",
   "group": "Рекомендация",
   "size": "390 × 844",
   "file": "screens/s12-rec-new.html",
@@ -549,6 +541,14 @@
   "group": "Рекомендация",
   "size": "390 × 844",
   "file": "screens/s12-rec-last.html",
+  "route": "rec"
+ },
+ {
+  "id": "s13-result-only-notfit",
+  "title": "S13 · «Не подходит нам» у новой рекомендации: только вариант «Не подошла»",
+  "group": "Результат",
+  "size": "390 × 844",
+  "file": "screens/s13-result-only-notfit.html",
   "route": "rec"
  },
  {

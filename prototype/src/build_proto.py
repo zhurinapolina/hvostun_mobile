@@ -77,9 +77,15 @@ T["s1"] = T["s1"].replace('data-r="s2" href="#s2"', 'data-r="s2"').replace('href
 def grown(h):
     """Новые экраны: на досках телефон растянут по содержимому, в прототипе он обычной высоты и прокручивается внутри."""
     h = clean(h).replace('class="ph lg"', 'class="ph"').replace(' style="flex:1 0 auto;overflow:visible"', "")
-    # искры на досках стоят в пикселях от ширины 390 — в прототипе переводим в проценты, чтобы не вылезали на узких экранах
-    # и по высоте привязываем к картинке, которая в прототипе сжимается под экран
-    return __import__("re").sub('(class="r-sp" style="left:)([0-9]+)px;top:([0-9]+)px', lambda m: m.group(1) + "%.1f%%;top:calc(12px + var(--sat) + var(--pich) * %.2f)" % (int(m.group(2)) / 3.9, max(0, int(m.group(3)) - 40) / 270), h)
+    # праздничные экраны (S8 «Портрет готов», S14): на досках искры стоят в пикселях от края телефона 390 px, картинка 342 × 250 с отступом 64 сверху.
+    # В прототипе картинка занимает всё свободное место над заголовком, поэтому искры кладём внутрь её рамки .r-art и переводим в проценты от рамки:
+    # они остаются вокруг собаки на любом экране
+    m = re.search(r'(<div class="r-fest">)((?:<svg class="r-sp".*?</svg>)+)(<div class="pic">)(<img[^>]*>)(</div>)', h, re.S)
+    if not m:
+        return h
+    sparks = re.sub(r'(class="r-sp" style="left:)([0-9]+)px;top:([0-9]+)px',
+                    lambda s: s.group(1) + "%.1f%%;top:%.1f%%" % ((int(s.group(2)) - 24) / 3.42, (int(s.group(3)) - 64) / 2.5), m.group(2))
+    return h[:m.start()] + m.group(1) + m.group(3) + '<div class="r-art">' + sparks + m.group(4) + "</div>" + m.group(5) + h[m.end():]
 
 
 for k, h in zip(("a", "a2", "b", "c"), phones("V-M-S3-AC")):
@@ -160,7 +166,7 @@ html = f"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <title>Хвостун</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 {fonts}
 <style id="board"></style>
 <style>:root{{color-scheme:light}}body{{margin:0}}img{{max-width:100%}}[hidden]{{display:none!important}}</style>
