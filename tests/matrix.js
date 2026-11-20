@@ -55,7 +55,7 @@ const STATES=[
  ['Профиль с портретом',0,()=>show('s4b',base({profile:'done',survey:'done',draft:filled(),plan:'new'}))],
  ['S8 ожидание',0,()=>show('s8',base({profile:'done',survey:'done',draft:filled()}))],
  ['S8 ошибка',0,async()=>{P().st=base({profile:'done',survey:'done',draft:filled()});P().go('s8',{back:true,err:1,keep:true});await wait(60)}],
- ['S8 готово',0,async()=>{const s=base({profile:'done',survey:'done',draft:filled(),plan:'new'});await show('s8',s)}],
+ ['S8 готово',0,()=>show('s8',base({profile:'done',survey:'done',draft:{...filled(),name:'Анатолий',sex:'мальчик'},plan:'new'}))],
  ['S8 готово, длинная кличка',0,()=>show('s8',base({profile:'done',survey:'done',draft:{...filled(),name:'Вельзевулпушистохвостый',sex:'мальчик'},plan:'new'}))],
  ['S8 ожидание, длинная кличка',0,()=>show('s8',base({profile:'done',survey:'done',draft:{...filled(),name:LONG}}))],
  ['D длинная кличка',0,()=>show('s3',base({profile:'done',survey:'done',draft:{...filled(),name:'Вельзевулпушистохвостый',sex:'мальчик'}}))],
@@ -143,6 +143,15 @@ function issues(){
   return [...new Set(bad)];
 }
 function scaleFonts(f){if(f===1)return;const els=$$('#app *');const fs=els.map(e=>parseFloat(getComputedStyle(e).fontSize));els.forEach((e,i)=>e.style.fontSize=fs[i]*f+'px')}
+function checkTitleWrap(bad){
+  const h=$('#app .sup .sec-t,#app .r-fest .hero');
+  if(!h)return;
+  if(getComputedStyle(h).hyphens!=='none')bad.push('автоматические переносы в заголовке');
+  const text=h.firstChild, m=text?.textContent.match(/пройден|анатолия/i);
+  if(!m||text.nodeType!==Node.TEXT_NODE)return;
+  const word=document.createRange();word.setStart(text,m.index);word.setEnd(text,m.index+m[0].length);
+  if(word.getClientRects().length>1)bad.push('разорвано слово '+m[0]);
+}
 
 window.__issues=issues;window.__states=STATES;
 window.__matrix=async function(o={}){
@@ -160,6 +169,7 @@ window.__matrix=async function(o={}){
         await prep();A.classList.toggle('kb',kb);await wait(40);
         scaleFonts(o.font||1);P().refit&&P().refit();await wait(20);
         const b=issues();
+        checkTitleWrap(b);
         if(b.length)res[`${W}×${H}${kb?' клав.'+h:''}${o.font>1?' шрифт×'+o.font:''} · ${name}`]=b;
       }
     }
