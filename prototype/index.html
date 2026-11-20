@@ -222,7 +222,7 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 #app .sup>*{flex:none}
 #app .sup .sa{height:clamp(96px,26cqh,220px)}
 #app .sup .sa img{max-height:min(220px,100%)}
-#app .sup .sec-t{margin-top:clamp(14px,3.6cqh,32px)}
+#app .sup .sec-t{margin-top:clamp(14px,3.6cqh,32px);hyphens:none}
 @container app (max-height:640px){#app .sup .sec-t{font-size:30px}}
 /* анкета: экраны вопросов прокручиваются, ползунок справа поверх */
 #app .ph>.sb{z-index:2;pointer-events:none}
@@ -360,6 +360,7 @@ body{font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(-
 #app .ph form.mn>.b1.w[disabled]{background:#edeef0;color:#6f7590;cursor:default;box-shadow:0 -18px 22px 10px #ffffff}
 /* длинная кличка одним словом переносится, а не вылезает за край */
 #app .r-fest .hero,#app .r-emp .ttl,#app .r-sc .d,#app .r-cur .t{overflow-wrap:anywhere}
+#app .r-fest .hero{hyphens:none}
 </style>
 </head>
 <body>
